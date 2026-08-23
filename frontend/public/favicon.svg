@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Standalone Wheat Crop Stem -->
+  <path d="M32 58V14" stroke="#21301F" stroke-width="3.5" stroke-linecap="round"/>
+  
+  <!-- Central Top Spike -->
+  <path d="M32 6 C32 6 29 11 32 15 C35 11 32 6 32 6Z" fill="#E5B84B" stroke="#21301F" stroke-width="1.5" stroke-linejoin="round"/>
+  
+  <!-- Left & Right Wheat Grains Pair 1 (Top) -->
+  <path d="M32 18 C26 15 22 18 25 24 C28 24 31 21 32 18Z" fill="#C79A3D" stroke="#21301F" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M32 18 C38 15 42 18 39 24 C36 24 33 21 32 18Z" fill="#C79A3D" stroke="#21301F" stroke-width="1.5" stroke-linejoin="round"/>
+  
+  <!-- Left & Right Wheat Grains Pair 2 (Middle) -->
+  <path d="M32 27 C24 23 20 27 23 33 C27 33 30 30 32 27Z" fill="#E5B84B" stroke="#21301F" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M32 27 C40 23 44 27 41 33 C37 33 34 30 32 27Z" fill="#E5B84B" stroke="#21301F" stroke-width="1.5" stroke-linejoin="round"/>
+  
+  <!-- Left & Right Wheat Grains Pair 3 (Lower) -->
+  <path d="M32 36 C23 32 19 36 22 42 C26 42 29 39 32 36Z" fill="#C79A3D" stroke="#21301F" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M32 36 C41 32 45 36 42 42 C38 42 35 39 32 36Z" fill="#C79A3D" stroke="#21301F" stroke-width="1.5" stroke-linejoin="round"/>
+
+  <!-- Wheat Awns (Fine Husks) -->
+  <path d="M25 24 L16 14M39 24 L48 14M23 33 L13 23M41 33 L51 23M22 42 L12 32M42 42 L52 32" stroke="#C79A3D" stroke-width="2" stroke-linecap="round"/>
+</svg>

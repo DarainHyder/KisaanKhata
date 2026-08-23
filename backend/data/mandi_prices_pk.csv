@@ -1,0 +1,23 @@
+# Mandi Prices Dataset — Pakistan
+# =================================
+# This file is a placeholder. Replace it with real mandi price data.
+#
+# Expected columns:
+#   date              : ISO-8601 date (YYYY-MM-DD)
+#   crop              : Crop name in English lowercase (e.g. wheat, cotton, rice)
+#   location          : District/city in Pakistan (e.g. Multan, Lahore, Faisalabad)
+#   price_per_40kg    : Wholesale price per 40 kg bag in PKR
+#   price_per_maund   : Wholesale price per maund (≈ 37.3 kg) in PKR
+#   source            : Data source label (e.g. "AMIS", "PBS", "manual")
+#
+# Suggested free data sources:
+#   - Pakistan Bureau of Statistics (PBS) crop reports
+#   - AMIS (Agricultural Market Information System)
+#   - KPK / Punjab agricultural department bulletins
+#
+date,crop,location,price_per_40kg,price_per_maund,source
+2024-04-01,wheat,Multan,3800,3550,placeholder
+2024-04-01,wheat,Lahore,3850,3600,placeholder
+2024-04-01,cotton,Multan,8500,7950,placeholder
+2024-04-01,rice,Gujranwala,5200,4860,placeholder
+2024-04-01,sugarcane,Rahim Yar Khan,380,355,placeholder

@@ -1,0 +1,43 @@
+# KisaanKhata — Backend Dependencies
+# =====================================
+# Install with: pip install -r requirements.txt
+#
+# Pinning major versions only so that minor patches are picked up automatically
+# while avoiding breaking changes during the hackathon sprint.
+
+# Web framework
+fastapi>=0.111.0
+
+# ASGI server (run with: uvicorn main:app --reload)
+uvicorn[standard]>=0.29.0
+
+# ORM + SQLite driver (sqlite3 is bundled with Python — no extra driver needed)
+sqlalchemy>=2.0.0
+
+# Data validation (FastAPI uses this internally too)
+pydantic>=2.6.0
+
+# .env file loading
+python-dotenv>=1.0.0
+
+# Speech-to-text — local Whisper inference (no API key, no PyTorch required)
+# Requires ffmpeg on system: https://ffmpeg.org/download.html
+faster-whisper>=1.0.0
+
+# Multipart form / file upload support (required for /voice endpoint)
+python-multipart>=0.0.9
+
+# Data manipulation — used in price_matcher.py to query the mandi CSV
+pandas>=2.2.0
+
+# Web scraping — AMIS Punjab live price pipeline
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# Background job scheduler — periodic AMIS scrape every 6 hours
+apscheduler>=3.10.0
+
+# SMS / WhatsApp interface — Twilio API client
+# Sign up free at https://www.twilio.com/try-twilio
+twilio>=9.0.0

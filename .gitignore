@@ -1,0 +1,29 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Environment Secrets
+.env
+*.env
+
+# Python Cache & SQLite Database
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+backend/kisaankhata.db
+
+# Node Modules & Frontend Build
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# Logs & System
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,136 @@
+  41  Apple (Ammre)
+  82  Apple (Gatcha)
+  40  Apple (Golden)
+  77  Apple Kala Kullu (Madani)
+  39  Apple Kala Kullu (Pahari)
+  94  Apricot White
+  93  Apricot Yellow
+  42  Banana(DOZEN)
+  50  Banola
+  51  Banola Cake
+ 138  Barley(جو)
+ 130  Batho
+  31  Bitter Gourd (کریلا)
+ 102  Bottle Gourd (کدو)
+  28  Brinjal
+ 127  Brown Sugar(شکر)
+  64  Cabbage
+ 117  Canola
+  85  Capsicum (شملہ مرچ)
+  38  Carrot
+ 109  Carrot China
+  34  Cauliflower
+ 107  Cocoyam(اروی)
+ 120  Cocunut
+ 114  Coriander (دھنیا)
+  74  Cucumber (Kheera)
+  81  Dates (Aseel)
+ 141  Dates(Irani)
+ 105  Fenugreek(میتھی)
+ 128  feutral early(100 Pcs) فروٹر
+  24  Garlic (China)
+  73  Garlic (Local)
+  68  Ginger (Thai)
+  25  Ginger(China)
+   9  Gram Black Bareek
+ 144  Gram Black Mota
+  99  Gram Flour (بیسن)
+  10  Gram Pulse(Bareek)
+ 142  Gram Pulse(Moti)
+   8  Gram White  Bareek
+  67  Gram White(Imported) Mota
+  61  Grapefruit(100Pcs)
+  47  Grapes (Other)
+  96  Grapes Gola
+  97  Grapes Sundekhani
+ 126  green chickpeas(چھولیا)
+  84  Green Chilli
+  52  Green Fodder
+ 129  Green Onion
+  63  Groundnut
+  43  Guava
+  65  Jaggery (گڑ)
+ 104  Jaman
+ 119  jujube(بیر)
+  45  Kinnow (100Pcs)
+  30  Lady Finger/Okra (بھنڈی توری)
+  87  Lemon (China)
+  86  Lemon (Desi)
+  83  Lemon (Other)
+ 140  Loquat
+  79  Lychee
+  17  Maize
+  78  Mango (Malda)
+  92  Mango Desi
+  91  Mango Saharni
+  62  Mango(Anwer Ratol)
+  48  Mango(Chounsa)
+  55  Mango(Desahri)
+  56  Mango(Sindhri)
+  13  Mash
+ 143  Mash Pulse(imported) Unwashed
+  14  Mash Pulse(Imported) washed
+  66  Mash Pulse(local)
+  72  Masoor Pulse (Imported) Moti
+  16  Masoor Pulse(local) Bareek
+  70  Masoor Whole (Imported)
+  15  Masoor Whole(local)
+  75  Melon
+  18  Millet
+ 115  Mint(پودینہ)
+ 106  Mongray
+  11  Moong
+  12  Moong Pulse Kori
+  60  Musambi(100Pcs)
+ 108  Mustard Greens(ساگ سرسوں)
+ 122  Mustard seed
+  23  Onion
+  44  Orange(100Pcs)
+   6  Paddy (IRRI)
+   5  Paddy Basmati
+ 112  Paddy Kainat
+ 124  Papaya(پپیتا)
+  88  Peach
+  89  Peach Special
+  98  Pear
+  35  Peas
+ 110  Persimmon(جاپانی پھل)
+  90  Plum
+  95  Pomegranate Desi
+  59  Pomegranate(Badana)
+  46  Pomegranate(Kandhari)
+  21  Potato Fresh
+  22  Potato Store
+ 134  Potato Sugar free
+  33  Pumpkin
+  37  Radish
+  20  RapeSeed (Torya)
+  29  Red Chilli Whole (Dry)
+   4  Rice (IRRI)
+  58  Rice Basmati (385)
+   3  Rice Basmati Super (New)
+  57  Rice Basmati Super (Old)
+ 113  Rice Kainat (New)
+ 145  Rice Kainat Old
+  49  Seed Cotton(Phutti)
+ 118  Sesame(تِل)
+  19  Sorghum
+  27  Spinach
+  80  Strawberry
+   7  Sugar
+ 125  sugarcane(گنڈ یری)
+ 136  Suger Beet(چقندر)
+ 116  Sunflower
+ 100  Sweet Musk Melon
+ 101  Sweet Musk Melon (Shireen)
+ 111  Sweet Potato(شکر قندی)
+  32  Tinda Desi
+ 135  Tindian
+  26  Tomato
+ 123  Turmeric Whole(ثابت ہلدی)
+  36  Turnip
+ 137  Water chestnut(سنگھاڑا)
+  76  Watermelon
+   1  Wheat
+  53  Wheat Straw
+ 103  Zucchini (گھیا توری)
