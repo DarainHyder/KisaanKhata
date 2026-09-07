@@ -1,9 +1,38 @@
 # Hugging Face Spaces — root requirements
 # ========================================
-# HF Spaces installs dependencies from this file when using the Gradio SDK.
-# It pulls in the backend requirements and adds Gradio so the Space has a UI.
+# HF Spaces installs this file when using the Gradio SDK.
+# NOTE: HF already installs gradio[oauth], uvicorn, websockets and torch,
+# so those are intentionally omitted here to avoid version conflicts.
 
--r backend/requirements.txt
+# Web framework
+fastapi>=0.111.0
 
-# UI framework required by Hugging Face Spaces Gradio SDK
-gradio>=4.0.0
+# ORM + SQLite driver
+sqlalchemy>=2.0.0
+
+# Data validation
+pydantic>=2.6.0
+
+# .env file loading
+python-dotenv>=1.0.0
+
+# Speech-to-text — local Whisper inference (no API key, no PyTorch required)
+# Requires ffmpeg on system (installed in HF Spaces Gradio runtime).
+faster-whisper>=1.0.0
+
+# Multipart form / file upload support
+python-multipart>=0.0.9
+
+# Data manipulation — used in price_matcher.py to query the mandi CSV
+pandas>=2.2.0
+
+# Web scraping — AMIS Punjab live price pipeline
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# Background job scheduler — periodic AMIS scrape every 6 hours
+apscheduler>=3.10.0
+
+# SMS / WhatsApp interface — Twilio API client
+twilio>=9.0.0
