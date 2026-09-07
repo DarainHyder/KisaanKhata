@@ -12,11 +12,27 @@ import os
 import sys
 from pathlib import Path
 
-# HF Spaces provides persistent storage at /data — use it for SQLite.
-os.environ.setdefault("DATABASE_URL", "sqlite:///data/kisaankhata.db")
+# Prefer the HF Spaces persistent-storage directory (/data) when available.
+# SQLite needs the parent directory to exist, so create it if necessary.
+_DEFAULT_DB_URL = "sqlite:///data/kisaankhata.db"
+os.environ.setdefault("DATABASE_URL", _DEFAULT_DB_URL)
 os.environ.setdefault("APP_ENV", "production")
 os.environ.setdefault("WHISPER_MODEL_SIZE", "small")
 os.environ.setdefault("WHISPER_LANGUAGE", "ur")
+
+_db_url = os.environ["DATABASE_URL"]
+if _db_url.startswith("sqlite:///"):
+    db_path = Path(_db_url.replace("sqlite:///", ""))
+    try:
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        # Verify the directory is actually writable; /data exists only when a
+        # persistent-storage volume is attached to the Space.
+        test_file = db_path.parent / ".write_test"
+        test_file.touch()
+        test_file.unlink()
+    except OSError:
+        # Fall back to the repo root so the Space starts without persistence.
+        os.environ["DATABASE_URL"] = "sqlite:///kisaankhata.db"
 
 # Make the backend package importable from the repo root.
 _BACKEND_DIR = Path(__file__).resolve().parent / "backend"
