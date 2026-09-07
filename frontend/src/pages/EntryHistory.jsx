@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import api from '../api'
+import { useI18n } from '../i18n/useI18n'
 import {
   FileText,
   CheckCircle2,
   AlertTriangle,
   TrendingUp,
   HelpCircle,
-  Lock,
   ShieldCheck,
   Wallet,
   Wheat
@@ -22,7 +22,7 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function PriceCheckIndicator({ entryId }) {
+function PriceCheckIndicator({ entryId, t }) {
   const [result, setResult] = useState(null)
 
   useEffect(() => {
@@ -35,17 +35,17 @@ function PriceCheckIndicator({ entryId }) {
 
   const statusKey = result.status || 'no_data'
   const map = {
-    fair:      { statusCls: 'status-bar-fair',      textCls: 'status-text-fair',      label: 'FAIR PRICE', Icon: CheckCircle2 },
-    underpaid: { statusCls: 'status-bar-underpaid', textCls: 'status-text-underpaid', label: 'UNDERPAID', Icon: AlertTriangle },
-    overpaid:  { statusCls: 'status-bar-overpaid',  textCls: 'status-text-overpaid',  label: 'ABOVE MARKET', Icon: TrendingUp },
-    no_data:   { statusCls: 'status-bar-nodata',    textCls: 'status-text-nodata',    label: 'NO MANDI DATA', Icon: HelpCircle },
+    fair:      { statusCls: 'status-bar-fair',      textCls: 'status-text-fair',      label: t('history.status.fair'), Icon: CheckCircle2 },
+    underpaid: { statusCls: 'status-bar-underpaid', textCls: 'status-text-underpaid', label: t('history.status.underpaid'), Icon: AlertTriangle },
+    overpaid:  { statusCls: 'status-bar-overpaid',  textCls: 'status-text-overpaid',  label: t('history.status.overpaid'), Icon: TrendingUp },
+    no_data:   { statusCls: 'status-bar-nodata',    textCls: 'status-text-nodata',    label: t('history.status.noData'), Icon: HelpCircle },
   }
   const { statusCls, textCls, label, Icon } = map[statusKey] || map.no_data
 
   return (
     <>
       <div className={`status-bar-indicator ${statusCls}`} />
-      
+
       <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
         <span className={`status-text-mono ${textCls}`}>
           <Icon size={14} />
@@ -62,6 +62,7 @@ function PriceCheckIndicator({ entryId }) {
 }
 
 export default function EntryHistory({ farmer }) {
+  const { t } = useI18n()
   const [entries, setEntries] = useState([])
   const [integrity, setIntegrity] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -78,21 +79,27 @@ export default function EntryHistory({ farmer }) {
         setEntries(entriesRes.data)
         if (verifyRes) setIntegrity(verifyRes.data)
       })
-      .catch(e => setError(e.response?.data?.detail || 'Failed to load ledger history.'))
+      .catch(e => setError(e.response?.data?.detail || t('history.loadError')))
       .finally(() => setLoading(false))
-  }, [farmer.id])
+  }, [farmer.id, t])
 
   const filtered = entries.filter(e => filter === 'all' || e.entry_type === filter)
+
+  const filterLabels = {
+    all: t('history.allEntries'),
+    loan: t('history.loans'),
+    sale: t('history.sales'),
+  }
 
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
         <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <FileText size={24} color="var(--accent-gold)" />
-          <span>Khata Ledger Book</span>
+          <span>{t('history.title')}</span>
         </h1>
         <p className="page-subtitle">
-          Farmer ID: <strong>#{farmer.id}</strong>. {farmer.name}
+          {t('history.farmerId')}: <strong>#{farmer.id}</strong>. {farmer.name}
         </p>
       </div>
 
@@ -117,14 +124,14 @@ export default function EntryHistory({ farmer }) {
             <>
               <ShieldCheck size={20} color="var(--status-fair)" style={{ flexShrink: 0 }} />
               <div>
-                <strong>SHA-256 HASH CHAIN INTACT</strong>. All {integrity.total_entries} entries verified untampered in database.
+                <strong>{t('history.hashIntact')}</strong>. {t('history.hashIntactDetail', { count: integrity.total_entries })}
               </div>
             </>
           ) : (
             <>
               <AlertTriangle size={20} color="var(--status-underpaid)" style={{ flexShrink: 0 }} />
               <div>
-                <strong>TAMPER DETECTED AT ENTRY #{integrity.broken_at_entry}</strong>. {integrity.detail}
+                <strong>{t('history.tamperDetected', { id: integrity.broken_at_entry })}</strong>. {integrity.detail}
               </div>
             </>
           )}
@@ -141,7 +148,7 @@ export default function EntryHistory({ farmer }) {
             style={{ flex: 1, padding: '10px', fontSize: '.9rem' }}
             onClick={() => setFilter(f)}
           >
-            <span style={{ textTransform: 'capitalize' }}>{f === 'all' ? 'All Entries' : f + 's'}</span>
+            <span>{filterLabels[f]}</span>
           </button>
         ))}
       </div>
@@ -154,7 +161,7 @@ export default function EntryHistory({ farmer }) {
           <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center' }}>
             <FileText size={40} color="var(--soil-brown)" />
           </div>
-          <div style={{ marginTop: 8 }}>No {filter === 'all' ? '' : filter} entries logged in this khata.</div>
+          <div style={{ marginTop: 8 }}>{t('history.noEntries', { type: filter === 'all' ? '' : filterLabels[filter].toLowerCase() })}</div>
         </div>
       )}
 
@@ -163,7 +170,7 @@ export default function EntryHistory({ farmer }) {
         {filtered.map(entry => (
           <div key={entry.id} className="ledger-row">
             {entry.entry_type === 'sale' && entry.reported_price_per_unit ? (
-              <PriceCheckIndicator entryId={entry.id} />
+              <PriceCheckIndicator entryId={entry.id} t={t} />
             ) : (
               <div className="status-bar-indicator status-bar-nodata" />
             )}
@@ -173,18 +180,18 @@ export default function EntryHistory({ farmer }) {
                 {entry.entry_type === 'loan' ? (
                   <>
                     <Wallet size={16} color="var(--status-underpaid)" />
-                    <span>Loan Received</span>
+                    <span>{t('history.loanReceived')}</span>
                   </>
                 ) : (
                   <>
                     <Wheat size={16} color="var(--status-fair)" />
-                    <span>Harvest Sale: {entry.crop_name || 'Crop'}</span>
+                    <span>{t('history.harvestSale')}: {entry.crop_name || t('history.cropFallback')}</span>
                   </>
                 )}
               </div>
 
               <div style={{ fontSize: '.84rem', color: 'var(--soil-brown)', marginTop: 2 }}>
-                {formatDate(entry.date)} . Unit: {entry.unit}
+                {formatDate(entry.date)} . {t('history.unit')}: {entry.unit}
                 {entry.reported_price_per_unit && (
                   <span style={{ fontFamily: 'var(--font-mono)', marginLeft: 6 }}>
                     (@{formatPKR(entry.reported_price_per_unit)}/{entry.unit})
