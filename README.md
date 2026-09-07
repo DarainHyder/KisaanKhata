@@ -1,3 +1,14 @@
+---
+title: KisaanKhata API
+emoji: 🌾
+colorFrom: green
+colorTo: blue
+sdk: gradio
+sdk_version: "5.0.0"
+app_file: app.py
+pinned: false
+---
+
 # KisaanKhata 🌾
 
 **A digital ledger for smallholder farmers in Pakistan.**  
