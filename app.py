@@ -61,13 +61,18 @@ def _zerogpu_placeholder() -> str:
 
 
 # Minimal Gradio page so HF Spaces has a UI to render at the Space root.
-with gr.Blocks(title="KisaanKhata API") as demo:
-    gr.Markdown("# KisaanKhata API")
-    gr.Markdown("The backend is running.")
-    gr.Markdown("Visit `/docs` for the interactive Swagger UI.")
-    # Keep the placeholder reachable so the decorator is detected; it is hidden
-    # from the UI because it is not rendered as an input/output component.
-    demo.load(_zerogpu_placeholder, inputs=None, outputs=None)
+# We use a gr.Interface so the @spaces.GPU decorated function is explicitly
+# wired into the Gradio app; this is what the ZeroGPU runtime scans for.
+demo = gr.Interface(
+    fn=_zerogpu_placeholder,
+    inputs=None,
+    outputs=gr.Textbox(label="Status", visible=False),
+    title="KisaanKhata API",
+    description=(
+        "The backend is running. "
+        "Visit `/docs` for the interactive Swagger UI."
+    ),
+)
 
 # Mount Gradio at `/`. FastAPI keeps all of its own routes.
 app = gr.mount_gradio_app(fastapi_app, demo, path="/")
