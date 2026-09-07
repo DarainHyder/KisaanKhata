@@ -121,11 +121,11 @@ Vercel is **serverless-first** and excellent for the React frontend, but the Fas
 The practical, low-cost setup is:
 
 - **Frontend → Vercel** (fast CDN, automatic deploys from GitHub)
-- **Backend → Render** (free tier, persistent disk, continuous process)
+- **Backend → Render** (free tier, persistent disk, continuous process) **or Hugging Face Spaces** (free Docker Spaces)
 
 ---
 
-### 1 — Backend on Render
+### Option A — Backend on Render
 
 The `backend/render.yaml` blueprint is already included. You only need to create the service and add secrets.
 
@@ -145,6 +145,41 @@ The `backend/render.yaml` blueprint is already included. You only need to create
 
 ---
 
+### Option B — Backend on Hugging Face Spaces
+
+Hugging Face Spaces can host the FastAPI backend through its free **Gradio SDK** — no Docker needed. A small `app.py` file at the repo root mounts a minimal Gradio UI onto the existing FastAPI app, so HF Spaces can serve it while all `/api/*`, `/admin/*`, `/docs`, etc. routes keep working.
+
+Trade-offs vs Render:
+
+1. **Sleeping containers** — free Spaces go to sleep after inactivity, so the 6-hour AMIS scraper will not run reliably. Voice price checks and ledger endpoints still work fine when the Space is awake.
+2. **Cold-start time** — the `faster-whisper` `small` model (~466 MB) downloads on first voice request, so the first transcription after a sleep will be slow.
+
+If those trade-offs are acceptable, follow these steps:
+
+1. Go to [huggingface.co/spaces](https://huggingface.co/spaces) and click **Create new Space**.
+2. Fill in:
+   - **Space name**: e.g. `kisaankhata-api`
+   - **License**: MIT (or your preference)
+   - **Space SDK**: **Gradio**
+   - **Space hardware**: **CPU free** (upgrade later if needed)
+3. Choose **Create**.
+4. Push this repo to the Space. The easiest way is to use the Space's Git URL:
+   ```bash
+   git clone https://huggingface.co/spaces/YOUR_USERNAME/kisaankhata-api
+   cd kisaankhata-api
+   git remote add upstream https://github.com/DarainHyder/KisaanKhata.git
+   git pull upstream main
+   git push origin main
+   ```
+   Alternatively, use the Hugging Face UI **Files** tab to upload `app.py`, `requirements.txt`, and the `backend/` folder.
+5. HF Spaces reads `requirements.txt` at the repo root, installs `gradio` plus the backend dependencies, and runs `app.py`.
+6. Once the build is green, your backend URL is `https://YOUR_USERNAME-kisaankhata-api.hf.space`.
+7. (Optional) Add Twilio secrets in the Space **Settings → Secrets** if you plan to use SMS/WhatsApp.
+
+> The SQLite database is stored at `/data/kisaankhata.db`, which is persisted by Hugging Face Spaces.
+
+---
+
 ### 2 — Frontend on Vercel
 
 1. Go to [vercel.com](https://vercel.com) and sign up/log in with GitHub.
@@ -156,7 +191,9 @@ The `backend/render.yaml` blueprint is already included. You only need to create
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
 5. Add an environment variable:
-   - `VITE_API_BASE_URL` = your Render backend URL + `/api`, e.g. `https://kisaankhata-api.onrender.com/api`
+   - `VITE_API_BASE_URL` = your backend URL + `/api`
+     - If you used Render: `https://kisaankhata-api.onrender.com/api`
+     - If you used Hugging Face Spaces: `https://YOUR_USERNAME-kisaankhata-api.hf.space/api`
 6. Click **Deploy**.
 
 Vercel will rebuild and redeploy automatically on every push to `main`.
