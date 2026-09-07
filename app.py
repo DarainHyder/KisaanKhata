@@ -48,11 +48,26 @@ sys.path.insert(0, str(_BACKEND_DIR))
 import gradio as gr  # noqa: E402
 from main import app as fastapi_app  # noqa: E402
 
+# Hugging Face Spaces ZeroGPU requires at least one function decorated with
+# @spaces.GPU in the Gradio SDK entrypoint. The decorator is a no-op outside
+# ZeroGPU, so it does not affect local development or CPU deployments.
+import spaces  # noqa: E402
+
+
+@spaces.GPU
+def _zerogpu_placeholder() -> str:
+    """Placeholder that satisfies the ZeroGPU runtime scan at startup."""
+    return "ok"
+
+
 # Minimal Gradio page so HF Spaces has a UI to render at the Space root.
 with gr.Blocks(title="KisaanKhata API") as demo:
     gr.Markdown("# KisaanKhata API")
     gr.Markdown("The backend is running.")
     gr.Markdown("Visit `/docs` for the interactive Swagger UI.")
+    # Keep the placeholder reachable so the decorator is detected; it is hidden
+    # from the UI because it is not rendered as an input/output component.
+    demo.load(_zerogpu_placeholder, inputs=None, outputs=None)
 
 # Mount Gradio at `/`. FastAPI keeps all of its own routes.
 app = gr.mount_gradio_app(fastapi_app, demo, path="/")
