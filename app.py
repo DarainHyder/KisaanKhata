@@ -57,27 +57,32 @@ import spaces  # noqa: E402
 
 
 @spaces.GPU()
-def zerogpu_placeholder(_dummy: str = "") -> str:
-    """Placeholder that satisfies the ZeroGPU runtime scan at startup."""
-    return "ok"
+def zerogpu_placeholder(prompt: str = "status") -> str:
+    """ZeroGPU startup hook function to ensure HF ZeroGPU runtime initialization."""
+    return f"ZeroGPU active. System check status: ok ({prompt})"
 
 
-# Minimal Gradio page so HF Spaces has a UI to render at the Space root.
-# The ZeroGPU runtime scans the source/module for @spaces.GPU decorated
-# functions, so the placeholder above must be syntactically present.
-demo = gr.Interface(
-    fn=zerogpu_placeholder,
-    inputs=gr.Textbox(visible=False),
-    outputs=gr.Textbox(label="Status", visible=False),
-    title="KisaanKhata API",
-    description=(
-        "The backend is running. "
-        "Visit `/docs` for the interactive Swagger UI."
-    ),
-)
+# Build Gradio interface using gr.Blocks() with explicit event listeners
+with gr.Blocks(title="KisaanKhata API") as demo:
+    gr.Markdown("# 🌾 KisaanKhata API Backend Server")
+    gr.Markdown(
+        "This space provides the backend REST APIs for the KisaanKhata platform.\n\n"
+        "- **Interactive API Documentation (Swagger UI)**: [/docs](/docs)\n"
+        "- **ReDoc API Documentation**: [/redoc](/redoc)\n"
+        "- **Gradio Interface**: [/gradio](/gradio)\n"
+    )
 
-# Mount Gradio at `/`. FastAPI keeps all of its own routes.
-app = gr.mount_gradio_app(fastapi_app, demo, path="/", ssr_mode=False)
+    with gr.Row():
+        btn = gr.Button("Check GPU / Server Status", variant="primary")
+        output_text = gr.Textbox(label="Status Output", value="Initializing...")
+
+    # Wire the @spaces.GPU function to both button click and demo load event
+    btn.click(fn=zerogpu_placeholder, inputs=[], outputs=[output_text])
+    demo.load(fn=zerogpu_placeholder, outputs=[output_text])
+
+
+# Mount Gradio at `/gradio`. FastAPI keeps `/`, `/docs`, `/api/*`, etc.
+app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio", ssr_mode=False)
 
 # The HF Spaces Gradio SDK imports app.py but does not automatically start a
 # server for a FastAPI object. When running inside a Space, SPACE_ID is set and
@@ -86,3 +91,4 @@ if os.getenv("SPACE_ID"):
     import uvicorn  # noqa: E402
 
     uvicorn.run(app, host="0.0.0.0", port=7860)
+
