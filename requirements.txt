@@ -1,0 +1,9 @@
+# Hugging Face Spaces — root requirements
+# ========================================
+# HF Spaces installs dependencies from this file when using the Gradio SDK.
+# It pulls in the backend requirements and adds Gradio so the Space has a UI.
+
+-r backend/requirements.txt
+
+# UI framework required by Hugging Face Spaces Gradio SDK
+gradio>=4.0.0
