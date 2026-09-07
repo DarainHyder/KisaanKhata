@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: kisaankhata-api
+    env: python
+    plan: free
+    packages:
+      - ffmpeg
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      # SQLite is stored on the persistent disk so records survive redeploys.
+      - key: DATABASE_URL
+        value: sqlite:///./data/kisaankhata.db
+      - key: APP_ENV
+        value: production
+      - key: WHISPER_MODEL_SIZE
+        value: small
+      - key: WHISPER_LANGUAGE
+        value: ur
+      # Add your Twilio secrets in the Render dashboard:
+      # - key: TWILIO_ACCOUNT_SID
+      #   sync: false
+      # - key: TWILIO_AUTH_TOKEN
+      #   sync: false
+      # - key: TWILIO_PHONE_NUMBER
+      #   sync: false
+    disk:
+      name: kisaankhata-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
