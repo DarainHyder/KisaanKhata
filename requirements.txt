@@ -4,6 +4,9 @@
 # NOTE: HF already installs gradio[oauth], uvicorn, websockets and torch,
 # so those are intentionally omitted here to avoid version conflicts.
 
+# Hugging Face Spaces ZeroGPU decorator (required when Space hardware is GPU/ZeroGPU)
+spaces>=0.30.0
+
 # Web framework
 fastapi>=0.111.0
 
