@@ -3,7 +3,7 @@
    Identity: Authentic Agricultural Ledger (Khata)
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=IBM+Plex+Mono:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=IBM+Plex+Mono:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -799,6 +799,133 @@ input:focus, select:focus, textarea:focus {
   text-align: center;
   padding: 40px 20px;
   color: var(--soil-brown);
+}
+
+/* Language Switcher ---------- */
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(237, 234, 224, 0.12);
+  border: 1px solid rgba(237, 234, 224, 0.3);
+  color: var(--bg);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+}
+
+.navbar.scrolled .language-switcher,
+.navbar .language-switcher {
+  color: var(--bg);
+  border-color: rgba(237, 234, 224, 0.3);
+}
+
+.mobile-menu-panel .language-switcher {
+  color: var(--text);
+  border-color: var(--soil-brown);
+  background: rgba(107, 74, 50, 0.06);
+  margin-bottom: 16px;
+}
+
+.language-switcher select {
+  width: auto;
+  padding: 4px 8px;
+  font-size: 0.88rem;
+  background: transparent;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.language-switcher.compact {
+  padding: 4px 8px;
+  gap: 6px;
+}
+
+.language-switcher.compact select {
+  padding: 2px 4px;
+  font-size: 0.82rem;
+}
+
+/* RTL Support ---------- */
+[dir="rtl"] body {
+  font-family: 'Noto Nastaliq Urdu', 'Work Sans', sans-serif;
+}
+
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] .font-heading {
+  font-family: 'Noto Nastaliq Urdu', 'Fraunces', Georgia, serif;
+}
+
+[dir="rtl"] .ledger-feature-row {
+  text-align: right;
+}
+
+[dir="rtl"] .ledger-feature-title {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .contact-info-item {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+[dir="rtl"] .ledger-row {
+  text-align: right;
+}
+
+[dir="rtl"] .ledger-row > div:first-child {
+  order: 1;
+}
+
+[dir="rtl"] .navbar-brand,
+[dir="rtl"] .footer-brand-title {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .btn {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .tile-label,
+[dir="rtl"] .summary-tile {
+  text-align: right;
+}
+
+[dir="rtl"] .mobile-menu-panel {
+  right: auto;
+  left: 0;
+  transform: translateX(-100%);
+  border-left: none;
+  border-right: 2px solid var(--soil-brown);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+[dir="rtl"] .mobile-menu-panel.open {
+  transform: translateX(0);
+}
+
+[dir="rtl"] .tab-btn {
+  border-right: none;
+  border-left: 1px solid rgba(107, 74, 50, 0.15);
+}
+
+[dir="rtl"] .tab-btn:last-child {
+  border-left: none;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] select,
+[dir="rtl"] textarea {
+  text-align: right;
+}
+
+[dir="rtl"] .language-switcher {
+  flex-direction: row-reverse;
 }
 
 /* Responsive Media Queries */
