@@ -33,3 +33,11 @@ with gr.Blocks(title="KisaanKhata API") as demo:
 
 # Mount Gradio at `/`. FastAPI keeps all of its own routes.
 app = gr.mount_gradio_app(fastapi_app, demo, path="/")
+
+# The HF Spaces Gradio SDK imports app.py but does not automatically start a
+# server for a FastAPI object. When running inside a Space, SPACE_ID is set and
+# we start uvicorn explicitly so the backend stays alive and serves traffic.
+if os.getenv("SPACE_ID"):
+    import uvicorn  # noqa: E402
+
+    uvicorn.run(app, host="0.0.0.0", port=7860)
