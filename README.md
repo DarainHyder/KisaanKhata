@@ -108,6 +108,67 @@ The API will be available at **http://127.0.0.1:8000**
 
 ---
 
+## Deployment
+
+### Why not both on Vercel?
+
+Vercel is **serverless-first** and excellent for the React frontend, but the FastAPI backend has three parts that do not fit Vercel's model well:
+
+1. **SQLite persistence** — Vercel functions have an ephemeral filesystem; the database would reset on every deploy/cold start.
+2. **Background scheduler** — `APScheduler` needs a continuously running process; Vercel functions are request-scoped.
+3. **Local Whisper** — the `faster-whisper` model and its dependencies are far larger than Vercel's function size limit.
+
+The practical, low-cost setup is:
+
+- **Frontend → Vercel** (fast CDN, automatic deploys from GitHub)
+- **Backend → Render** (free tier, persistent disk, continuous process)
+
+---
+
+### 1 — Backend on Render
+
+The `backend/render.yaml` blueprint is already included. You only need to create the service and add secrets.
+
+1. Go to [render.com](https://render.com) and sign up/log in with GitHub.
+2. Click **New + → Blueprint**.
+3. Connect your `DarainHyder/KisaanKhata` repo.
+4. Render will read `backend/render.yaml` and propose a free web service called `kisaankhata-api`.
+5. In the Render dashboard, add these environment variables under **Environment**:
+   - `TWILIO_ACCOUNT_SID` — from your Twilio console
+   - `TWILIO_AUTH_TOKEN` — from your Twilio console
+   - `TWILIO_PHONE_NUMBER` — e.g. `+1234567890`
+6. Click **Create Blueprint**. Render builds and deploys the backend.
+7. Once live, copy the backend URL (e.g. `https://kisaankhata-api.onrender.com`).
+
+> The SQLite file is stored on a 1 GB persistent disk at `./data/kisaankhata.db`, so data survives redeploys.
+> `ffmpeg` is installed automatically via the `packages:` section in `render.yaml`.
+
+---
+
+### 2 — Frontend on Vercel
+
+1. Go to [vercel.com](https://vercel.com) and sign up/log in with GitHub.
+2. Click **Add New… → Project**.
+3. Import `DarainHyder/KisaanKhata`.
+4. In the project settings:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+5. Add an environment variable:
+   - `VITE_API_BASE_URL` = your Render backend URL + `/api`, e.g. `https://kisaankhata-api.onrender.com/api`
+6. Click **Deploy**.
+
+Vercel will rebuild and redeploy automatically on every push to `main`.
+
+---
+
+### 3 — Connect frontend to backend locally
+
+For local development the Vite dev proxy still forwards `/api` to `http://localhost:8000`, so no change is needed.
+
+---
+
 ## API Overview
 
 ### Ledger (`/api/ledger`)
