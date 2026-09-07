@@ -22,7 +22,13 @@ os.environ.setdefault("WHISPER_LANGUAGE", "ur")
 
 _db_url = os.environ["DATABASE_URL"]
 if _db_url.startswith("sqlite:///"):
-    db_path = Path(_db_url.replace("sqlite:///", ""))
+    # Use SQLAlchemy's URL parser so the path we test matches exactly what
+    # SQLAlchemy will hand to the sqlite driver (this differs by OS: on Linux
+    # ``sqlite:///data/...`` is absolute ``/data/...``, while on Windows it is
+    # relative ``data/...``).
+    from sqlalchemy import make_url  # noqa: E402
+
+    db_path = Path(make_url(_db_url).database)
     try:
         db_path.parent.mkdir(parents=True, exist_ok=True)
         # Verify the directory is actually writable; /data exists only when a
@@ -32,7 +38,8 @@ if _db_url.startswith("sqlite:///"):
         test_file.unlink()
     except OSError:
         # Fall back to the repo root so the Space starts without persistence.
-        os.environ["DATABASE_URL"] = "sqlite:///kisaankhata.db"
+        # The ``./`` prefix keeps the path explicitly relative on every OS.
+        os.environ["DATABASE_URL"] = "sqlite:///./kisaankhata.db"
 
 # Make the backend package importable from the repo root.
 _BACKEND_DIR = Path(__file__).resolve().parent / "backend"
