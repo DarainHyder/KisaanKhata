@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import api from '../api'
+import { useI18n } from '../i18n/useI18n'
 import {
   Mic,
   TrendingUp,
@@ -16,13 +17,14 @@ import {
 } from 'lucide-react'
 
 export default function FarmerLogin({ onLogin }) {
+  const { t } = useI18n()
   const [mode, setMode] = useState('login') // 'login' | 'find'
   const [phone, setPhone] = useState('')
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  
+
   // Contact section state
   const [contactName, setContactName] = useState('')
   const [contactContact, setContactContact] = useState('')
@@ -41,7 +43,7 @@ export default function FarmerLogin({ onLogin }) {
   async function handleLogin(e) {
     e.preventDefault()
     setError('')
-    if (!phone.trim()) return setError('Please enter your phone number.')
+    if (!phone.trim()) return setError(t('login.errors.phoneRequired'))
     setLoading(true)
     try {
       const res = await api.post('/ledger/farmers', {
@@ -52,9 +54,9 @@ export default function FarmerLogin({ onLogin }) {
       onLogin(res.data)
     } catch (err) {
       if (err.response?.status === 409) {
-        setError('Phone number already registered. Switch to Find Account below.')
+        setError(t('login.errors.phoneRegistered'))
       } else {
-        setError(err.response?.data?.detail || 'Something went wrong.')
+        setError(err.response?.data?.detail || t('login.errors.somethingWrong'))
       }
     } finally {
       setLoading(false)
@@ -64,7 +66,7 @@ export default function FarmerLogin({ onLogin }) {
   async function handleFind(e) {
     e.preventDefault()
     setError('')
-    if (!phone.trim()) return setError('Please enter your phone number.')
+    if (!phone.trim()) return setError(t('login.errors.phoneRequired'))
     setLoading(true)
     try {
       const res = await api.get('/ledger/farmers/by-phone', {
@@ -72,12 +74,12 @@ export default function FarmerLogin({ onLogin }) {
       }).catch(() => null)
 
       if (!res) {
-        setError('Farmer record not found. Please register a new account.')
+        setError(t('login.errors.farmerNotFound'))
       } else {
         onLogin(res.data)
       }
     } catch (err) {
-      setError(err.response?.data?.detail || 'Farmer record not found.')
+      setError(err.response?.data?.detail || t('login.errors.farmerNotFound'))
     } finally {
       setLoading(false)
     }
@@ -88,14 +90,14 @@ export default function FarmerLogin({ onLogin }) {
     setContactError('')
     setContactSuccess('')
 
-    if (!contactName.trim()) return setContactError('Please enter your name.')
-    if (!contactContact.trim()) return setContactError('Please enter your email or phone number.')
-    if (!contactMessage.trim()) return setContactError('Please enter your message.')
+    if (!contactName.trim()) return setContactError(t('login.errors.nameRequired'))
+    if (!contactContact.trim()) return setContactError(t('login.errors.contactRequired'))
+    if (!contactMessage.trim()) return setContactError(t('login.errors.messageRequired'))
 
     setContactSubmitting(true)
     setTimeout(() => {
       setContactSubmitting(false)
-      setContactSuccess('Thank you for reaching out. Our team will contact you shortly.')
+      setContactSuccess(t('contact.success'))
       setContactName('')
       setContactContact('')
       setContactMessage('')
@@ -108,7 +110,7 @@ export default function FarmerLogin({ onLogin }) {
       <section id="hero" className="hero-wrapper">
         <img
           src="/images/hero-farm.jpg"
-          alt="Pakistani wheat farmer harvesting crops in agricultural field"
+          alt={t('hero.headline')}
           className="hero-bg-img"
         />
         <div className="hero-overlay" />
@@ -123,12 +125,12 @@ export default function FarmerLogin({ onLogin }) {
             marginBottom: '14px',
             fontWeight: 600
           }}>
-            KisaanKhata Digital Farm Ledger
+            {t('hero.eyebrow')}
           </div>
 
           {/* Exactly one H1 per page */}
           <h1 className="hero-headline">
-            Your harvest. Your record. No one else's word against yours.
+            {t('hero.headline')}
           </h1>
 
           <a
@@ -136,7 +138,7 @@ export default function FarmerLogin({ onLogin }) {
             className="btn btn-primary hero-cta"
             onClick={scrollToForm}
           >
-            <span>Access Your Ledger</span>
+            <span>{t('hero.cta')}</span>
             <ArrowRight size={18} />
           </a>
         </div>
@@ -144,17 +146,17 @@ export default function FarmerLogin({ onLogin }) {
 
       {/* ---------- 2. FEATURES LEDGER SECTION ---------- */}
       <section id="how-it-works" className="features-ledger-section">
-        <h2 className="features-ledger-header">Built for Pakistan's Agricultural Community</h2>
+        <h2 className="features-ledger-header">{t('features.header')}</h2>
 
         <div className="ledger-feature-row">
           <div className="ledger-feature-num">01</div>
           <div>
             <div className="ledger-feature-title">
               <Mic size={18} color="var(--accent-gold)" />
-              <span>Voice First Urdu Logging</span>
+              <span>{t('features.voiceFirst.title')}</span>
             </div>
             <div className="ledger-feature-desc">
-              Speak naturally in Urdu or local dialect. Speech recognition transcribes and extracts loans and harvest sales automatically.
+              {t('features.voiceFirst.desc')}
             </div>
           </div>
         </div>
@@ -164,10 +166,10 @@ export default function FarmerLogin({ onLogin }) {
           <div>
             <div className="ledger-feature-title">
               <TrendingUp size={18} color="var(--accent-gold)" />
-              <span>AMIS Punjab Mandi Price Verification</span>
+              <span>{t('features.priceVerify.title')}</span>
             </div>
             <div className="ledger-feature-desc">
-              Cross check your sale prices against official live Punjab wholesale rates to spot underpayment immediately.
+              {t('features.priceVerify.desc')}
             </div>
           </div>
         </div>
@@ -177,10 +179,10 @@ export default function FarmerLogin({ onLogin }) {
           <div>
             <div className="ledger-feature-title">
               <Lock size={18} color="var(--accent-gold)" />
-              <span>Cryptographic Hash Chain Integrity</span>
+              <span>{t('features.integrity.title')}</span>
             </div>
             <div className="ledger-feature-desc">
-              Every ledger entry is linked by a SHA-256 hash chain. Records cannot be silently altered after creation.
+              {t('features.integrity.desc')}
             </div>
           </div>
         </div>
@@ -190,10 +192,10 @@ export default function FarmerLogin({ onLogin }) {
           <div>
             <div className="ledger-feature-title">
               <MessageSquare size={18} color="var(--accent-gold)" />
-              <span>Basic Phone SMS and WhatsApp Interface</span>
+              <span>{t('features.sms.title')}</span>
             </div>
             <div className="ledger-feature-desc">
-              No smartphone required. Query live mandi prices via Roman Urdu SMS commands on any basic feature phone.
+              {t('features.sms.desc')}
             </div>
           </div>
         </div>
@@ -203,10 +205,10 @@ export default function FarmerLogin({ onLogin }) {
       <section id="khata-form" ref={formRef} style={{ padding: '40px 20px 60px', maxWidth: '560px', margin: '0 auto' }}>
         <div className="card" style={{ background: '#F5F3EC', border: '1px solid var(--soil-brown)', padding: '32px 24px' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.45rem', marginBottom: '6px', textAlign: 'center' }}>
-            Open Your Farm Khata
+            {t('login.title')}
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--soil-brown)', textAlign: 'center', marginBottom: '24px' }}>
-            Enter your details to manage transactions and check mandi prices.
+            {t('login.subtitle')}
           </p>
 
           {/* Mode Toggle Buttons */}
@@ -217,7 +219,7 @@ export default function FarmerLogin({ onLogin }) {
               style={{ flex: 1, padding: '10px' }}
               onClick={() => { setMode('login'); setError('') }}
             >
-              New Account
+              {t('login.newAccount')}
             </button>
             <button
               type="button"
@@ -225,7 +227,7 @@ export default function FarmerLogin({ onLogin }) {
               style={{ flex: 1, padding: '10px' }}
               onClick={() => { setMode('find'); setError('') }}
             >
-              Find Account
+              {t('login.findAccount')}
             </button>
           </div>
 
@@ -236,11 +238,11 @@ export default function FarmerLogin({ onLogin }) {
               <div className="form-group">
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Phone size={16} color="var(--soil-brown)" />
-                  <span>Phone Number *</span>
+                  <span>{t('login.phoneLabel')}</span>
                 </label>
                 <input
                   type="tel"
-                  placeholder="03001234567"
+                  placeholder={t('login.phonePlaceholder')}
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                   required
@@ -250,11 +252,11 @@ export default function FarmerLogin({ onLogin }) {
               <div className="form-group">
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <User size={16} color="var(--soil-brown)" />
-                  <span>Farmer Full Name *</span>
+                  <span>{t('login.nameLabel')}</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="Muhammad Aslam"
+                  placeholder={t('login.namePlaceholder')}
                   value={name}
                   onChange={e => setName(e.target.value)}
                   required
@@ -264,11 +266,11 @@ export default function FarmerLogin({ onLogin }) {
               <div className="form-group">
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <MapPin size={16} color="var(--soil-brown)" />
-                  <span>City or Mandi Location *</span>
+                  <span>{t('login.locationLabel')}</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="Multan"
+                  placeholder={t('login.locationPlaceholder')}
                   value={location}
                   onChange={e => setLocation(e.target.value)}
                   required
@@ -276,7 +278,7 @@ export default function FarmerLogin({ onLogin }) {
               </div>
 
               <button className="btn btn-primary" type="submit" disabled={loading}>
-                {loading ? 'Registering...' : 'Open Khata Ledger'}
+                {loading ? t('login.registering') : t('login.openLedger')}
               </button>
             </form>
           ) : (
@@ -284,11 +286,11 @@ export default function FarmerLogin({ onLogin }) {
               <div className="form-group">
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Phone size={16} color="var(--soil-brown)" />
-                  <span>Registered Phone Number *</span>
+                  <span>{t('login.phoneLabel')}</span>
                 </label>
                 <input
                   type="tel"
-                  placeholder="03001234567"
+                  placeholder={t('login.phonePlaceholder')}
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                   required
@@ -298,28 +300,28 @@ export default function FarmerLogin({ onLogin }) {
               <div className="form-group">
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <User size={16} color="var(--soil-brown)" />
-                  <span>Farmer Name (Verification)</span>
+                  <span>{t('login.verifyNameLabel')}</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="Muhammad Aslam"
+                  placeholder={t('login.namePlaceholder')}
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
               </div>
 
               <button className="btn btn-primary" type="submit" disabled={loading}>
-                {loading ? 'Searching...' : 'Find My Khata'}
+                {loading ? t('login.searching') : t('login.findMyKhata')}
               </button>
 
               <hr className="divider" />
               <p style={{ fontSize: '.85rem', color: 'var(--soil-brown)', textAlign: 'center', marginBottom: 12 }}>
-                Or enter your numeric Farmer ID directly
+                {t('login.directId')}
               </p>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input
                   type="number"
-                  placeholder="Farmer ID (e.g. 1)"
+                  placeholder={t('login.farmerIdPlaceholder')}
                   min={1}
                   id="direct-id"
                   style={{ flex: 1 }}
@@ -331,10 +333,10 @@ export default function FarmerLogin({ onLogin }) {
                   onClick={() => {
                     const id = parseInt(document.getElementById('direct-id').value)
                     if (id > 0) onLogin({ id, name: name || 'Farmer', phone_number: phone })
-                    else setError('Please enter a valid Farmer ID.')
+                    else setError(t('login.errors.invalidId'))
                   }}
                 >
-                  Enter
+                  {t('login.enter')}
                 </button>
               </div>
             </form>
@@ -345,10 +347,10 @@ export default function FarmerLogin({ onLogin }) {
       {/* ---------- 4. REBUILT CONTACT SECTION ---------- */}
       <section id="contact" className="contact-section">
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', textAlign: 'center', marginBottom: '8px' }}>
-          Get in Touch
+          {t('contact.title')}
         </h2>
         <p style={{ fontSize: '0.95rem', color: 'var(--soil-brown)', textAlign: 'center', maxWidth: '640px', margin: '0 auto 28px', lineHeight: 1.55 }}>
-          Have questions about mandi price verification, SMS access, or agricultural cooperative partnerships? Send us a message and our team will assist you.
+          {t('contact.subtitle')}
         </p>
 
         <div className="contact-grid">
@@ -364,10 +366,10 @@ export default function FarmerLogin({ onLogin }) {
 
             <form onSubmit={handleContactSubmit}>
               <div className="form-group">
-                <label>Full Name *</label>
+                <label>{t('contact.nameLabel')}</label>
                 <input
                   type="text"
-                  placeholder="Your Name"
+                  placeholder={t('contact.namePlaceholder')}
                   value={contactName}
                   onChange={e => setContactName(e.target.value)}
                   required
@@ -375,10 +377,10 @@ export default function FarmerLogin({ onLogin }) {
               </div>
 
               <div className="form-group">
-                <label>Phone Number or Email *</label>
+                <label>{t('contact.contactLabel')}</label>
                 <input
                   type="text"
-                  placeholder="03001234567 or email@domain.com"
+                  placeholder={t('contact.contactPlaceholder')}
                   value={contactContact}
                   onChange={e => setContactContact(e.target.value)}
                   required
@@ -386,10 +388,10 @@ export default function FarmerLogin({ onLogin }) {
               </div>
 
               <div className="form-group">
-                <label>Message *</label>
+                <label>{t('contact.messageLabel')}</label>
                 <textarea
                   rows={4}
-                  placeholder="Describe your inquiry..."
+                  placeholder={t('contact.messagePlaceholder')}
                   value={contactMessage}
                   onChange={e => setContactMessage(e.target.value)}
                   required
@@ -398,7 +400,7 @@ export default function FarmerLogin({ onLogin }) {
 
               <button className="btn btn-primary" type="submit" disabled={contactSubmitting}>
                 <Send size={16} />
-                <span>{contactSubmitting ? 'Sending...' : 'Send Message'}</span>
+                <span>{contactSubmitting ? t('contact.sending') : t('contact.send')}</span>
               </button>
             </form>
           </div>
@@ -406,15 +408,15 @@ export default function FarmerLogin({ onLogin }) {
           {/* Info Side */}
           <div className="contact-info-panel">
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', marginBottom: '16px' }}>
-              Support Information
+              {t('contact.supportInfo')}
             </h3>
 
             <div className="contact-info-item">
               <Phone size={20} color="var(--accent-gold)" style={{ marginTop: 2, flexShrink: 0 }} />
               <div>
-                <strong style={{ display: 'block', fontSize: '0.92rem' }}>SMS Helpline Service</strong>
+                <strong style={{ display: 'block', fontSize: '0.92rem' }}>{t('contact.smsHelpline')}</strong>
                 <span style={{ fontSize: '0.88rem', color: 'var(--soil-brown)' }}>
-                  Send "SALE [crop] [price] [city]" to our helpline for immediate price checking.
+                  {t('contact.smsHelpText')}
                 </span>
               </div>
             </div>
@@ -422,9 +424,9 @@ export default function FarmerLogin({ onLogin }) {
             <div className="contact-info-item">
               <ShieldCheck size={20} color="var(--accent-gold)" style={{ marginTop: 2, flexShrink: 0 }} />
               <div>
-                <strong style={{ display: 'block', fontSize: '0.92rem' }}>Institutional Verification</strong>
+                <strong style={{ display: 'block', fontSize: '0.92rem' }}>{t('contact.institutional')}</strong>
                 <span style={{ fontSize: '0.88rem', color: 'var(--soil-brown)' }}>
-                  Agriculture departments and banking partners can access verified district reports via our analytics endpoints.
+                  {t('contact.institutionalText')}
                 </span>
               </div>
             </div>
@@ -432,9 +434,9 @@ export default function FarmerLogin({ onLogin }) {
             <div className="contact-info-item">
               <HelpCircle size={20} color="var(--accent-gold)" style={{ marginTop: 2, flexShrink: 0 }} />
               <div>
-                <strong style={{ display: 'block', fontSize: '0.92rem' }}>Farmer Support Hours</strong>
+                <strong style={{ display: 'block', fontSize: '0.92rem' }}>{t('contact.supportHours')}</strong>
                 <span style={{ fontSize: '0.88rem', color: 'var(--soil-brown)' }}>
-                  Monday to Saturday, 8:00 AM to 6:00 PM PKT.
+                  {t('contact.supportHoursText')}
                 </span>
               </div>
             </div>
