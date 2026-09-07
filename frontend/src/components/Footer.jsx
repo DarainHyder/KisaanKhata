@@ -1,6 +1,8 @@
 import { Wheat } from 'lucide-react'
+import { useI18n } from '../i18n/useI18n'
 
 export default function Footer() {
+  const { t } = useI18n()
   const currentYear = new Date().getFullYear()
 
   return (
@@ -9,36 +11,35 @@ export default function Footer() {
         <div>
           <div className="footer-brand-title">
             <Wheat size={22} color="var(--accent-gold)" />
-            <span>KisaanKhata</span>
+            <span>{t('brand')}</span>
           </div>
           <p className="footer-brand-desc">
-            Empowering Pakistani smallholder farmers with voice-first ledger logging,
-            live AMIS mandi price verification, and cryptographic record integrity.
+            {t('footer.desc')}
           </p>
         </div>
 
         <div>
-          <div className="footer-heading">Quick Links</div>
+          <div className="footer-heading">{t('footer.quickLinks')}</div>
           <ul className="footer-links">
-            <li><a href="#hero" className="footer-link">Home</a></li>
-            <li><a href="#how-it-works" className="footer-link">How It Works</a></li>
-            <li><a href="#features" className="footer-link">Features</a></li>
-            <li><a href="#contact" className="footer-link">Contact Us</a></li>
+            <li><a href="#hero" className="footer-link">{t('nav.home')}</a></li>
+            <li><a href="#how-it-works" className="footer-link">{t('nav.howItWorks')}</a></li>
+            <li><a href="#features" className="footer-link">{t('nav.features')}</a></li>
+            <li><a href="#contact" className="footer-link">{t('nav.contact')}</a></li>
           </ul>
         </div>
 
         <div>
-          <div className="footer-heading">Platform</div>
+          <div className="footer-heading">{t('footer.platform')}</div>
           <ul className="footer-links">
-            <li><a href="#khata-form" className="footer-link">Open Khata</a></li>
-            <li><a href="#contact" className="footer-link">Support Helpline</a></li>
+            <li><a href="#khata-form" className="footer-link">{t('footer.openKhata')}</a></li>
+            <li><a href="#contact" className="footer-link">{t('footer.supportHelpline')}</a></li>
           </ul>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <div>&copy; {currentYear} KisaanKhata. All rights reserved.</div>
-        <div>Built for Pakistan's Agricultural Community</div>
+        <div>{t('footer.copyright', { year: currentYear })}</div>
+        <div>{t('footer.builtFor')}</div>
       </div>
     </footer>
   )
