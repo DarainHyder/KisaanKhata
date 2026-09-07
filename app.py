@@ -19,6 +19,8 @@ os.environ.setdefault("DATABASE_URL", _DEFAULT_DB_URL)
 os.environ.setdefault("APP_ENV", "production")
 os.environ.setdefault("WHISPER_MODEL_SIZE", "small")
 os.environ.setdefault("WHISPER_LANGUAGE", "ur")
+# Gradio 5's SSR mode can break ZeroGPU detection/auth on HF Spaces.
+os.environ.setdefault("GRADIO_SSR_MODE", "false")
 
 _db_url = os.environ["DATABASE_URL"]
 if _db_url.startswith("sqlite:///"):
@@ -54,18 +56,18 @@ from main import app as fastapi_app  # noqa: E402
 import spaces  # noqa: E402
 
 
-@spaces.GPU
-def _zerogpu_placeholder() -> str:
+@spaces.GPU()
+def zerogpu_placeholder(_dummy: str = "") -> str:
     """Placeholder that satisfies the ZeroGPU runtime scan at startup."""
     return "ok"
 
 
 # Minimal Gradio page so HF Spaces has a UI to render at the Space root.
-# We use a gr.Interface so the @spaces.GPU decorated function is explicitly
-# wired into the Gradio app; this is what the ZeroGPU runtime scans for.
+# The ZeroGPU runtime scans the source/module for @spaces.GPU decorated
+# functions, so the placeholder above must be syntactically present.
 demo = gr.Interface(
-    fn=_zerogpu_placeholder,
-    inputs=None,
+    fn=zerogpu_placeholder,
+    inputs=gr.Textbox(visible=False),
     outputs=gr.Textbox(label="Status", visible=False),
     title="KisaanKhata API",
     description=(
@@ -75,7 +77,7 @@ demo = gr.Interface(
 )
 
 # Mount Gradio at `/`. FastAPI keeps all of its own routes.
-app = gr.mount_gradio_app(fastapi_app, demo, path="/")
+app = gr.mount_gradio_app(fastapi_app, demo, path="/", ssr_mode=False)
 
 # The HF Spaces Gradio SDK imports app.py but does not automatically start a
 # server for a FastAPI object. When running inside a Space, SPACE_ID is set and
