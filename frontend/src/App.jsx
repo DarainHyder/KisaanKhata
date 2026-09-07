@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState } from 'react'
+import { I18nProvider } from './i18n/I18nProvider'
 import FarmerLogin from './pages/FarmerLogin'
 import Dashboard from './pages/Dashboard'
 import VoiceEntry from './pages/VoiceEntry'
@@ -26,28 +27,32 @@ export default function App() {
 
   if (!farmer) {
     return (
-      <BrowserRouter>
-        <Navbar farmer={null} onLogout={handleLogout} />
-        <main>
-          <FarmerLogin onLogin={handleLogin} />
-        </main>
-        <Footer />
-      </BrowserRouter>
+      <I18nProvider>
+        <BrowserRouter>
+          <Navbar farmer={null} onLogout={handleLogout} />
+          <main>
+            <FarmerLogin onLogin={handleLogin} />
+          </main>
+          <Footer />
+        </BrowserRouter>
+      </I18nProvider>
     )
   }
 
   return (
-    <BrowserRouter>
-      <Navbar farmer={farmer} onLogout={handleLogout} />
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Dashboard farmer={farmer} />} />
-          <Route path="/voice" element={<VoiceEntry farmer={farmer} />} />
-          <Route path="/history" element={<EntryHistory farmer={farmer} />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-      <Footer />
-    </BrowserRouter>
+    <I18nProvider>
+      <BrowserRouter>
+        <Navbar farmer={farmer} onLogout={handleLogout} />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Dashboard farmer={farmer} />} />
+            <Route path="/voice" element={<VoiceEntry farmer={farmer} />} />
+            <Route path="/history" element={<EntryHistory farmer={farmer} />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+        <Footer />
+      </BrowserRouter>
+    </I18nProvider>
   )
 }
