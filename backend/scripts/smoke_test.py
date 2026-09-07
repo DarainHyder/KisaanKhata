@@ -13,7 +13,7 @@ if stt_service._model is not None:
 elif stt_service._model_load_error:
     print(f"Whisper model      : NOT loaded — {stt_service._model_load_error}")
 else:
-    print("Whisper model      : state unknown")
+    print("Whisper model      : LAZY (will load on first transcription request)")
 
 print("ledger router      : imported OK")
 print("ALL OK")

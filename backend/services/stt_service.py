@@ -9,7 +9,7 @@ space. API is slightly different: transcribe() returns a generator of segments.
 
 Key design
 ----------
-- Model loaded ONCE at module import (cached in _model).
+- Model loaded lazily on the first transcription request (cached in _model).
 - Default model size: "base" — good balance for hackathon demo without GPU.
 - Default language: "ur" (Urdu).
 - Supported formats: WAV, MP3, M4A, OGG, FLAC, WEBM (via ffmpeg).
@@ -72,10 +72,6 @@ def _load_model_once() -> None:
         print(f"[STT] WARNING — {_model_load_error}")
 
 
-# Load at import time — one cost paid once at server startup
-_load_model_once()
-
-
 # ===========================================================================
 # Public API
 # ===========================================================================
@@ -83,6 +79,10 @@ _load_model_once()
 def transcribe_audio(audio_file_path: str, language: str = WHISPER_LANGUAGE) -> str:
     """
     Transcribe an audio file to text using the locally-running faster-whisper model.
+
+    The model is loaded lazily on the first transcription request so that the
+    server starts quickly on platforms like Hugging Face Spaces (the model is
+    downloaded once and then cached in memory).
 
     Args:
         audio_file_path : Path to the audio file (WAV, MP3, M4A, OGG, FLAC, WEBM).
@@ -93,14 +93,18 @@ def transcribe_audio(audio_file_path: str, language: str = WHISPER_LANGUAGE) -> 
         Transcribed text as a single plain string.
 
     Raises:
-        RuntimeError      : If the model failed to load at startup.
+        RuntimeError      : If the model failed to load.
         FileNotFoundError : If the audio file does not exist.
         ValueError        : If the file extension is not supported.
         RuntimeError      : If transcription fails for any other reason.
     """
+    global _model, _model_load_error
+    if _model is None and _model_load_error is None:
+        _load_model_once()
+
     if _model is None:
         raise RuntimeError(
-            _model_load_error or "Whisper model is not loaded. Check server startup logs."
+            _model_load_error or "Whisper model is not loaded. Check server logs."
         )
 
     path = Path(audio_file_path)
