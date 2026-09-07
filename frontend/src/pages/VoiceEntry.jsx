@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import api from '../api'
+import { useI18n } from '../i18n/useI18n'
 import {
   Mic,
   SquareCheck,
@@ -24,7 +25,10 @@ const EMPTY_FORM = {
   date: new Date().toISOString().slice(0, 10),
 }
 
+const UNITS = ['40kg','maund','kg','quintal','tonne','dozen','PKR']
+
 export default function VoiceEntry({ farmer }) {
+  const { lang, t } = useI18n()
   const [recording, setRecording] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [transcript, setTranscript] = useState('')
@@ -48,7 +52,7 @@ export default function VoiceEntry({ farmer }) {
       mr.start()
       setRecording(true)
     } catch {
-      setError('Microphone access denied. Please allow microphone access and try again.')
+      setError(t('voice.errors.micDenied'))
     }
   }
 
@@ -65,7 +69,7 @@ export default function VoiceEntry({ farmer }) {
       const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
       const fd = new FormData()
       fd.append('audio', blob, 'recording.webm')
-      const res = await api.post('/ledger/voice-entry?language=ur', fd, {
+      const res = await api.post(`/ledger/voice-entry?language=${lang}`, fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       const data = res.data
@@ -81,7 +85,7 @@ export default function VoiceEntry({ farmer }) {
       })
       setStep('confirm')
     } catch (e) {
-      setError(e.response?.data?.detail || 'Transcription failed. Please try again.')
+      setError(e.response?.data?.detail || t('voice.errors.transcriptionFailed'))
     } finally {
       setProcessing(false)
     }
@@ -90,11 +94,11 @@ export default function VoiceEntry({ farmer }) {
   async function handleConfirm(e) {
     e.preventDefault()
     setError('')
-    if (!form.entry_type) return setError('Please select Loan or Sale.')
-    if (!form.amount)     return setError('Please enter the amount.')
-    if (!form.unit)       return setError('Please enter the unit.')
-    if (form.entry_type === 'sale' && !form.crop_name) return setError('Please enter the crop name for a sale.')
-    if (form.entry_type === 'sale' && !form.reported_price_per_unit) return setError('Please enter the price per unit for a sale.')
+    if (!form.entry_type) return setError(t('voice.errors.selectType'))
+    if (!form.amount)     return setError(t('voice.errors.amountRequired'))
+    if (!form.unit)       return setError(t('voice.errors.unitRequired'))
+    if (form.entry_type === 'sale' && !form.crop_name) return setError(t('voice.errors.cropRequired'))
+    if (form.entry_type === 'sale' && !form.reported_price_per_unit) return setError(t('voice.errors.priceRequired'))
 
     setProcessing(true)
     try {
@@ -107,10 +111,10 @@ export default function VoiceEntry({ farmer }) {
         crop_name:               form.crop_name || null,
         reported_price_per_unit: form.reported_price_per_unit ? parseFloat(form.reported_price_per_unit) : null,
       })
-      setSuccess('Entry recorded securely in farm ledger.')
+      setSuccess(t('voice.success'))
       setStep('done')
     } catch (e) {
-      setError(e.response?.data?.detail || 'Failed to save entry.')
+      setError(e.response?.data?.detail || t('voice.errors.saveFailed'))
     } finally {
       setProcessing(false)
     }
@@ -131,9 +135,9 @@ export default function VoiceEntry({ farmer }) {
       <div>
         <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Mic size={24} color="var(--accent-gold)" />
-          <span>Voice Entry</span>
+          <span>{t('voice.title')}</span>
         </h1>
-        <p className="page-subtitle">Speak your loan or sale details in Urdu</p>
+        <p className="page-subtitle">{t('voice.subtitle')}</p>
 
         {error && <div className="alert alert-error">{error}</div>}
 
@@ -145,33 +149,33 @@ export default function VoiceEntry({ farmer }) {
                 className={`mic-btn${recording ? ' recording' : ''}`}
                 onClick={recording ? stopRecording : startRecording}
                 disabled={processing}
-                title={recording ? "Stop Recording" : "Start Recording"}
+                title={recording ? t('voice.stopRecording') : t('voice.startRecording')}
               >
                 {processing ? <Loader2 size={36} className="spinner" style={{ margin: 0 }} /> : <Mic size={36} />}
               </button>
             </div>
             <div className="mic-label">
-              {processing ? 'Transcribing audio with Whisper...' : recording ? 'Recording... Tap stamp to finish' : 'Tap stamp to start recording'}
+              {processing ? t('voice.transcribing') : recording ? t('voice.recording') : t('voice.startRecording')}
             </div>
           </div>
 
           <div className="alert alert-info" style={{ marginBottom: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, marginBottom: 4 }}>
               <HelpCircle size={16} />
-              <span>Examples in Urdu</span>
+              <span>{t('voice.examples')}</span>
             </div>
-            <div>"Maine gandum becha, 3000 rupay, 40kg"</div>
-            <div>"Maine 50000 rupay ka qarz liya"</div>
+            <div>{t('voice.example1')}</div>
+            <div>{t('voice.example2')}</div>
           </div>
         </div>
 
         <hr className="divider" />
         <p style={{ textAlign: 'center', color: 'var(--soil-brown)', fontSize: '.9rem', marginBottom: 12 }}>
-          Or enter transaction details manually
+          {t('voice.manualEntryHint')}
         </p>
         <button className="btn btn-outline" onClick={() => { setStep('confirm'); setTranscript('') }}>
           <Edit3 size={18} />
-          <span>Type Entry Manually</span>
+          <span>{t('voice.manualEntry')}</span>
         </button>
       </div>
     )
@@ -183,15 +187,15 @@ export default function VoiceEntry({ farmer }) {
       <div>
         <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <SquareCheck size={24} color="var(--status-fair)" />
-          <span>Review and Verify Entry</span>
+          <span>{t('voice.reviewTitle')}</span>
         </h1>
-        <p className="page-subtitle">Confirm transaction details before saving to ledger</p>
+        <p className="page-subtitle">{t('voice.reviewSubtitle')}</p>
 
         {transcript && (
           <div className="card" style={{ background: '#F5F3EC', border: '1px solid var(--soil-brown)' }}>
             <label style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--soil-brown)' }}>
               <Volume2 size={16} />
-              <span>Whisper Transcription</span>
+              <span>{t('voice.transcription')}</span>
             </label>
             <div className="transcript-box">{transcript}</div>
             {confidenceNote && (
@@ -205,7 +209,7 @@ export default function VoiceEntry({ farmer }) {
         <form onSubmit={handleConfirm}>
           <div className="card" style={{ background: '#F5F3EC', border: '1px solid var(--soil-brown)' }}>
             <div className="form-group">
-              <label>Transaction Type *</label>
+              <label>{t('voice.transactionType')}</label>
               <div style={{ display: 'flex', gap: 8 }}>
                 {['loan', 'sale'].map(t => (
                   <button
@@ -216,18 +220,18 @@ export default function VoiceEntry({ farmer }) {
                     onClick={() => setForm(f => ({ ...f, entry_type: t }))}
                   >
                     {t === 'loan' ? <Wallet size={16} /> : <Wheat size={16} />}
-                    <span style={{ textTransform: 'capitalize' }}>{t}</span>
+                    <span>{t === 'loan' ? t('voice.loan') : t('voice.sale')}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="form-group">
-              <label>Total Amount (PKR) *</label>
+              <label>{t('voice.amountLabel')}</label>
               <input
                 type="number"
                 min="1"
-                placeholder="50000"
+                placeholder={t('voice.amountPlaceholder')}
                 className="num-mono"
                 value={form.amount}
                 onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
@@ -235,11 +239,11 @@ export default function VoiceEntry({ farmer }) {
             </div>
 
             <div className="form-group">
-              <label>Unit *</label>
+              <label>{t('voice.unitLabel')}</label>
               <select value={form.unit} onChange={e => setForm(f => ({ ...f, unit: e.target.value }))}>
-                <option value="">Select unit...</option>
-                {['40kg','maund','kg','quintal','tonne','dozen','PKR'].map(u => (
-                  <option key={u} value={u}>{u}</option>
+                <option value="">{t('voice.unitPlaceholder')}</option>
+                {UNITS.map(u => (
+                  <option key={u} value={u}>{t(`voice.units.${u}`)}</option>
                 ))}
               </select>
             </div>
@@ -247,20 +251,20 @@ export default function VoiceEntry({ farmer }) {
             {form.entry_type === 'sale' && (
               <>
                 <div className="form-group">
-                  <label>Crop Name *</label>
+                  <label>{t('voice.cropLabel')}</label>
                   <input
                     type="text"
-                    placeholder="wheat, cotton"
+                    placeholder={t('voice.cropPlaceholder')}
                     value={form.crop_name}
                     onChange={e => setForm(f => ({ ...f, crop_name: e.target.value }))}
                   />
                 </div>
                 <div className="form-group">
-                  <label>Reported Price per Unit (PKR) *</label>
+                  <label>{t('voice.priceLabel')}</label>
                   <input
                     type="number"
                     min="1"
-                    placeholder="3800"
+                    placeholder={t('voice.pricePlaceholder')}
                     className="num-mono"
                     value={form.reported_price_per_unit}
                     onChange={e => setForm(f => ({ ...f, reported_price_per_unit: e.target.value }))}
@@ -270,7 +274,7 @@ export default function VoiceEntry({ farmer }) {
             )}
 
             <div className="form-group">
-              <label>Date *</label>
+              <label>{t('voice.dateLabel')}</label>
               <input
                 type="date"
                 className="num-mono"
@@ -282,12 +286,12 @@ export default function VoiceEntry({ farmer }) {
 
           <button className="btn btn-primary" type="submit" disabled={processing}>
             <Save size={18} />
-            <span>{processing ? 'Saving to Ledger...' : 'Commit and Stamp to Ledger'}</span>
+            <span>{processing ? t('voice.saving') : t('voice.save')}</span>
           </button>
-          
+
           <button type="button" className="btn btn-outline" style={{ marginTop: 10 }} onClick={reset}>
             <RotateCcw size={18} />
-            <span>Record Again</span>
+            <span>{t('voice.recordAgain')}</span>
           </button>
         </form>
       </div>
@@ -299,17 +303,17 @@ export default function VoiceEntry({ farmer }) {
     <div>
       <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <SquareCheck size={24} color="var(--status-fair)" />
-        <span>Entry Committed</span>
+        <span>{t('voice.doneTitle')}</span>
       </h1>
       <div className="alert alert-success">{success}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
         <button className="btn btn-primary" onClick={reset}>
           <Plus size={18} />
-          <span>Record Another Entry</span>
+          <span>{t('voice.recordAnother')}</span>
         </button>
         <button className="btn btn-outline" onClick={() => window.location.href = '/'}>
           <ArrowLeft size={18} />
-          <span>Back to Dashboard</span>
+          <span>{t('voice.backToDashboard')}</span>
         </button>
       </div>
     </div>
