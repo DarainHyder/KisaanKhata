@@ -42,7 +42,7 @@ export default function LiveStats() {
       ]
 
   return (
-    <section className="stats-band" aria-label={t('stats.aria')}>
+    <section className="stats-band theme-soil" aria-label={t('stats.aria')}>
       <div className="container">
         <div className="stats-grid">
           {items.map((it, i) => <Stat key={it.label} index={i} {...it} />)}

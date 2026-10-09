@@ -12,45 +12,41 @@ const CROPS = [
 export default function Hero({ onCta }) {
   const { t, lang } = useI18n()
   const sectionRef = useRef(null)
-  const mediaRef = useRef(null)
-  const innerRef = useRef(null)
+  const photoRef = useRef(null)
 
   useScrollTimeline(sectionRef, p => {
     const q = Math.max(0, (p - 0.5) * 2)
-    if (mediaRef.current) mediaRef.current.style.transform = `translateY(${q * 14}%) scale(${1.04 + q * 0.06})`
-    if (innerRef.current) innerRef.current.style.transform = `translateY(${-q * 50}px)`
+    if (photoRef.current) photoRef.current.style.transform = `translateY(${q * -8}%) scale(${1.08 - q * 0.04})`
   }, { smoothing: 0.18 })
 
-  // The last sentence of the headline is set in italic gold.
+  // The last sentence of the headline is set in field green.
   const sentences = t('hero.headline').split(/(?<=[.。۔])\s*/).filter(Boolean)
   let w = 0
 
   return (
-    <section id="hero" className="hero" ref={sectionRef}>
-      <div className="hero-media" ref={mediaRef}>
-        <img src="/images/hero-farm.jpg" alt="" fetchPriority="high" />
-      </div>
-      <div className="hero-shade" />
+    <section id="hero" className="hero theme-mustard" ref={sectionRef}>
+      <div className="container hero-grid">
+        <div className="hero-copy">
+          <div className="hero-meta">
+            <span className="kicker">{t('hero.kicker')}</span>
+          </div>
 
-      <div className="container hero-inner" ref={innerRef}>
-        <div className="hero-meta">
-          <span className="kicker">{t('hero.kicker')}</span>
-          <span className="hero-coords">30.1575° N · 71.5249° E</span>
-        </div>
+          <h1 className="hero-title" key={lang}>
+            {sentences.map((s, si) => (
+              <span key={si} className={si === sentences.length - 1 && sentences.length > 1 ? 'accent' : ''}>
+                {s.split(' ').map((word, i, arr) => (
+                  <span key={i} className="word" style={{ animationDelay: `${0.08 + (w++) * 0.05}s` }}>
+                    {word}{i < arr.length - 1 || si < sentences.length - 1 ? ' ' : ''}
+                  </span>
+                ))}
+              </span>
+            ))}
+          </h1>
 
-        <h1 className="hero-title" key={lang}>
-          {sentences.map((s, si) => (
-            <span key={si} className={si === sentences.length - 1 && sentences.length > 1 ? 'accent' : ''}>
-              {s.split(' ').map((word, i, arr) => (
-                <span key={i} className="word" style={{ animationDelay: `${0.1 + (w++) * 0.06}s` }}>
-                  {word}{i < arr.length - 1 || si < sentences.length - 1 ? ' ' : ''}
-                </span>
-              ))}
-            </span>
-          ))}
-        </h1>
-
-        <div className="hero-foot">
+          <p className="hero-slogan">
+            <span className="slogan-ur" lang="ur" dir="rtl">{t('hero.slogan')}</span>
+            {lang !== 'ur' && <span className="slogan-gloss">{t('hero.sloganGloss')}</span>}
+          </p>
           <p className="hero-sub">{t('hero.sub')}</p>
           <div className="hero-actions">
             <a href="#khata-form" className="btn btn-solid" onClick={onCta}>
@@ -59,9 +55,24 @@ export default function Hero({ onCta }) {
             <a href="#features" className="link-under">{t('hero.down')} <span aria-hidden="true">↓</span></a>
           </div>
         </div>
+
+        <figure className="hero-figure">
+          <div className="duotone">
+            <img ref={photoRef} src="/images/hero-farm.jpg" alt="" fetchPriority="high" />
+          </div>
+          <span className="hero-urdu" lang="ur" dir="rtl" aria-hidden="true">کسان کھاتہ</span>
+          <figcaption>
+            <span>{t('hero.figure')}</span>
+            <span>30.16° N · 71.52° E</span>
+          </figcaption>
+          <div className="stamp stamp-bad hero-stamp" aria-hidden="true">
+            <span className="stamp-main">{t('hero.stampMain')}</span>
+            <span className="stamp-sub">{t('hero.stampSub')}</span>
+          </div>
+        </figure>
       </div>
 
-      <div className="ticker" aria-label={t('hero.tickerLabel')}>
+      <div className="ticker theme-soil" aria-label={t('hero.tickerLabel')}>
         <span className="ticker-label">{t('hero.tickerLabel')}</span>
         <div className="ticker-window" dir="ltr">
           <div className="ticker-track">

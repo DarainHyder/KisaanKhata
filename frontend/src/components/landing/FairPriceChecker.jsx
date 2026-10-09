@@ -21,7 +21,7 @@ export default function FairPriceChecker() {
   const pct = Math.abs(diff * 100).toFixed(1)
 
   return (
-    <section id="price-check" className="section scale-section">
+    <section id="price-check" className="section scale-section theme-soil">
       <div className="container">
         <div className="split-head reveal">
           <div>

@@ -4,6 +4,14 @@
 const v2 = {
   en: {
     hero: {
+      headline: 'You feed Pakistan. Get the price you earned.',
+      cta: 'Open your free khata',
+      slogan: 'محنت آپ کی، پورا دام آپ کا',
+      sloganGloss: 'Your hard work, your full price',
+      sub: 'KisaanKhata is a free ledger for smallholder farmers. Speak a sale in Urdu and we check it against today’s mandi rate, seal the record so no arhtiya can rewrite it, and send the verdict to any phone.',
+      figure: 'Wheat harvest, south Punjab',
+      stampMain: 'Free for farmers',
+      stampSub: 'Always',
       kicker: 'Smallholder ledger · Punjab, Pakistan',
       tickerLabel: 'Crops the SMS line understands',
       down: 'Take an entry apart',
@@ -60,6 +68,14 @@ const v2 = {
 
   ur: {
     hero: {
+      headline: 'آپ پاکستان کا پیٹ پالتے ہیں۔ اپنی محنت کا پورا دام لیں۔',
+      cta: 'اپنا مفت کھاتہ کھولیں',
+      slogan: 'محنت آپ کی، پورا دام آپ کا',
+      sloganGloss: '',
+      sub: 'کسان کھاتہ چھوٹے کسانوں کے لیے مفت کھاتہ ہے۔ اردو میں فروخت بولیں، ہم آج کے منڈی نرخ سے جانچتے ہیں، ریکارڈ مہر بند کرتے ہیں تاکہ کوئی آڑھتی اسے بدل نہ سکے، اور نتیجہ کسی بھی فون پر بھیجتے ہیں۔',
+      figure: 'گندم کی کٹائی، جنوبی پنجاب',
+      stampMain: 'کسانوں کے لیے مفت',
+      stampSub: 'ہمیشہ',
       kicker: 'چھوٹے کسان کا کھاتہ · پنجاب، پاکستان',
       tickerLabel: 'فصلیں جو SMS لائن سمجھتی ہے',
       down: 'ایک اندراج کھول کر دیکھیں',
@@ -116,6 +132,14 @@ const v2 = {
 
   zh: {
     hero: {
+      headline: '你养活了巴基斯坦。拿回你应得的价格。',
+      cta: '开通免费账本',
+      slogan: 'محنت آپ کی، پورا دام آپ کا',
+      sloganGloss: '你的辛劳，你的全价',
+      sub: 'KisaanKhata 是为小农提供的免费账本。用乌尔都语说出一笔销售，我们对照当天的市场价核查，封存记录让中间商无法篡改，并把结论发到任何手机。',
+      figure: '南旁遮普的小麦收割',
+      stampMain: '农民免费',
+      stampSub: '永久',
       kicker: '小农账本 · 巴基斯坦旁遮普',
       tickerLabel: '短信线路能识别的作物',
       down: '拆开一条账目',

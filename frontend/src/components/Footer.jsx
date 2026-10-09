@@ -8,7 +8,7 @@ export default function Footer() {
   const docsUrl = `${API_ROOT}/docs`
 
   return (
-    <footer className="footer-wrapper">
+    <footer className="footer-wrapper theme-field">
       <div className="container">
         <div className="footer-content">
           <div>
@@ -39,7 +39,10 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="footer-word" aria-hidden="true">Kisaan<em>Khata</em></div>
+        <div className="footer-word" aria-hidden="true">
+          <span className="fw-en">KisaanKhata</span>
+          <span className="fw-ur" lang="ur" dir="rtl">کسان کھاتہ</span>
+        </div>
 
         <div className="footer-bottom">
           <div>{t('footer.copyright', { year: currentYear })}</div>

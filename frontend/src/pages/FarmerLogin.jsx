@@ -128,7 +128,7 @@ export default function FarmerLogin({ onLogin }) {
       <HashChain />
 
       {/* ---------- Open your khata ---------- */}
-      <section id="khata-form" ref={formRef} className="section access-section">
+      <section id="khata-form" ref={formRef} className="section access-section theme-mustard">
         <div className="container access">
           <div className="access-copy reveal">
             <span className="kicker">{t('access.eyebrow')}</span>
@@ -195,7 +195,7 @@ export default function FarmerLogin({ onLogin }) {
       </section>
 
       {/* ---------- Contact ---------- */}
-      <section id="contact" className="section contact-section">
+      <section id="contact" className="section contact-section theme-soil">
         <div className="container contact-grid">
           <div className="reveal">
             <span className="kicker">{t('nav.contact')}</span>

@@ -51,7 +51,8 @@ export default function Navbar({ farmer, onLogout }) {
       <nav className={`navbar${scrolled || farmer ? ' scrolled' : ''}`}>
         <Link to="/" className="navbar-brand">
           <span className="brand-mark"><Wheat size={19} /></span>
-          <span>{t('brand')}</span>
+          <span>KisaanKhata</span>
+          <span className="brand-ur" lang="ur">کسان کھاتہ</span>
         </Link>
 
         {farmer ? (

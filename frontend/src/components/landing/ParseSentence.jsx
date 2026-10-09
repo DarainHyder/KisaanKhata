@@ -61,7 +61,7 @@ export default function ParseSentence() {
   const isLit = f => SEQUENCE.indexOf(f) < lit
 
   return (
-    <section id="how-it-works" className="section parse" ref={sectionRef}>
+    <section id="how-it-works" className="section parse theme-mustard" ref={sectionRef}>
       <div className="container">
         <div className="split-head reveal">
           <div>

@@ -47,7 +47,7 @@ export default function HashChain() {
   }
 
   return (
-    <section id="integrity" className="section">
+    <section id="integrity" className="section theme-field">
       <div className="container">
         <div className="split-head reveal">
           <div>
@@ -98,7 +98,7 @@ export default function HashChain() {
             )
           })}
 
-          {tampered && <div className="stamp stamp-underpaid table-stamp"><span className="stamp-main">{t('chain.stamp')}</span><span className="stamp-sub">#1 → #3</span></div>}
+          {tampered && <div className="stamp stamp-bad table-stamp"><span className="stamp-main">{t('chain.stamp')}</span><span className="stamp-sub">#1 → #3</span></div>}
         </div>
         </div>
 

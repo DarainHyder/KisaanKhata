@@ -230,7 +230,7 @@ export default function ExplodedKhata() {
   useScrollTimeline(sectionRef, render, { mode: 'sticky', smoothing: 0.1 })
 
   return (
-    <section id="features" className="xv" ref={sectionRef} aria-labelledby="xv-title" style={reduce ? { height: '100svh' } : undefined}>
+    <section id="features" className="xv theme-field" ref={sectionRef} aria-labelledby="xv-title" style={reduce ? { height: '100svh' } : undefined}>
       <div className="xv-stage" ref={stageRef}>
         <div className="xv-grid" aria-hidden="true" />
 
