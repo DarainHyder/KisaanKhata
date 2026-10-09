@@ -49,7 +49,7 @@ REQUEST_DELAY_SECONDS = 2   # polite delay between requests
 HEADERS = {
     "User-Agent": (
         "KisaanKhata/1.0 (Hackathon Project; public agricultural data access) "
-        "Python-requests/2.31 — github.com/kisaankhata"
+        "Python-requests/2.31 - github.com/DarainHyder/KisaanKhata"  # header values must be latin-1 safe
     ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
@@ -120,9 +120,24 @@ def _parse_price(value: str) -> Optional[float]:
 def _strip_city_rank(raw: str) -> str:
     """
     AMIS prepends a rank digit to city names: '1Lahore' → 'Lahore'.
-    Strips leading digits and whitespace.
+    The markup also uses a bare '&nbsp' (no semicolon), which survives as
+    literal text. Strips leading digits, '&nbsp' and whitespace.
     """
-    return re.sub(r"^\d+\s*", "", raw.strip())
+    return re.sub(r"^(?:\d|\s| |&nbsp;?)+", "", raw.strip())
+
+
+# Prices are normalised to this unit everywhere in KisaanKhata.
+TARGET_UNIT_KG = 40
+
+
+def _page_unit_kg(soup: BeautifulSoup) -> Optional[float]:
+    """
+    Read the unit AMIS quotes prices in, e.g.
+    "[ All Prices are in Rs/100Kg specified otherwise ]" → 100.
+    Returns None if the page states no per-Kg unit.
+    """
+    m = re.search(r"Prices\s+are\s+in\s+Rs\s*/\s*(\d+(?:\.\d+)?)\s*Kg", soup.get_text(" "), re.I)
+    return float(m.group(1)) if m else None
 
 
 def _find_price_table(soup: BeautifulSoup):
@@ -168,6 +183,15 @@ def scrape_commodity(commodity_id: int, crop_name: str) -> list[dict]:
     soup = BeautifulSoup(resp.text, "lxml")
     tbl, rows = _find_price_table(soup)
 
+    # AMIS quotes most commodities per 100 Kg; convert to PKR per 40 Kg so
+    # references match what farmers report. Skip pages with no Kg unit
+    # (e.g. per-dozen items) rather than store mislabelled prices.
+    unit_kg = _page_unit_kg(soup)
+    if unit_kg is None:
+        logger.warning("No per-Kg unit found for %s (id=%d); skipping", crop_name, commodity_id)
+        return []
+    factor = TARGET_UNIT_KG / unit_kg
+
     if tbl is None:
         logger.warning("No price table found for %s (id=%d)", crop_name, commodity_id)
         return []
@@ -192,6 +216,7 @@ def scrape_commodity(commodity_id: int, crop_name: str) -> list[dict]:
         min_p = _parse_price(cells[2])
         max_p = _parse_price(cells[3])
         fqp   = _parse_price(cells[4])
+        min_p, max_p, fqp = (round(v * factor, 2) if v is not None else None for v in (min_p, max_p, fqp))
 
         # Skip rows with no price data at all
         if min_p is None and max_p is None and fqp is None:
@@ -203,7 +228,7 @@ def scrape_commodity(commodity_id: int, crop_name: str) -> list[dict]:
             "min_price": min_p,
             "max_price": max_p,
             "fqp":       fqp,
-            "unit":      "40 Kg",   # AMIS standard unit
+            "unit":      f"{TARGET_UNIT_KG} Kg",  # converted from the page's unit
         })
 
     logger.info("  ✓ %s (id=%d): %d city rows", crop_name, commodity_id, len(results))
