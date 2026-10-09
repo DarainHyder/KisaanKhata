@@ -33,6 +33,15 @@
   --rust-hi: #E5785A;
   --indigo: #36457E;
 
+  /* names used by component code */
+  --sprout: var(--leaf);
+  --brick: var(--rust);
+  --wheat: var(--amber-deep);
+  --text: var(--fg);
+  --status-fair: var(--leaf);
+  --status-underpaid: var(--rust);
+  --status-overpaid: var(--amber-deep);
+
   --serif: 'Fraunces', 'Noto Nastaliq Urdu', 'Noto Serif SC', Georgia, serif;
   --sans: 'Public Sans', 'Noto Nastaliq Urdu', 'Noto Sans SC', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', 'Noto Nastaliq Urdu', 'Noto Sans SC', ui-monospace, monospace;
