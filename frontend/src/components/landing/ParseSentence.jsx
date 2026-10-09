@@ -61,15 +61,15 @@ export default function ParseSentence() {
   const isLit = f => SEQUENCE.indexOf(f) < lit
 
   return (
-    <section id="how-it-works" className="section parse theme-mustard" ref={sectionRef}>
+    <section id="how-it-works" className="section parse t-light t-tint" ref={sectionRef}>
       <div className="container">
-        <div className="split-head reveal">
+        <header className="section-head reveal">
           <div>
-            <span className="kicker">{t('parse.eyebrow')}</span>
-            <h2 className="display-md">{t('parse.title')}</h2>
+            <p className="eyebrow">{t('parse.eyebrow')}</p>
+            <h2 className="h2">{t('parse.title')}</h2>
           </div>
           <p className="lead">{t('parse.lead')}</p>
-        </div>
+        </header>
 
         <div className="parse-board" ref={boardRef}>
           <div className="parse-label">{t('parse.example')}</div>

@@ -41,9 +41,18 @@ export function I18nProvider({ children }) {
     [lang]
   )
 
+  // Non-string values (e.g. lists of facts), with English fallback.
+  const raw = useCallback(
+    function getRaw(key) {
+      const pick = code => key.split('.').reduce((v, k) => (v == null ? v : v[k]), translations[code])
+      return pick(lang) ?? pick(DEFAULT_LANGUAGE)
+    },
+    [lang]
+  )
+
   const value = useMemo(
-    () => ({ lang, setLang, t, dir: LANGUAGES[lang].dir, languages: LANGUAGES }),
-    [lang, t]
+    () => ({ lang, setLang, t, raw, dir: LANGUAGES[lang].dir, languages: LANGUAGES }),
+    [lang, t, raw]
   )
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>

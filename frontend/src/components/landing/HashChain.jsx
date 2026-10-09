@@ -47,17 +47,17 @@ export default function HashChain() {
   }
 
   return (
-    <section id="integrity" className="section theme-field">
+    <section id="integrity" className="section t-light">
       <div className="container">
-        <div className="split-head reveal">
+        <header className="section-head reveal">
           <div>
-            <span className="kicker">{t('chain.eyebrow')}</span>
-            <h2 className="display-md">{t('chain.title')}</h2>
+            <p className="eyebrow">{t('chain.eyebrow')}</p>
+            <h2 className="h2">{t('chain.title')}</h2>
           </div>
           <p className="lead">{t('chain.lead')}</p>
-        </div>
+        </header>
 
-        <div className="reveal">
+        <div className="table-card reveal">
         <div className={`ledger-table${tampered ? ' is-tampered' : ''}`} role="table">
           <div className="lt-row lt-head" role="row">
             <span role="columnheader">{t('chain.col.no')}</span>

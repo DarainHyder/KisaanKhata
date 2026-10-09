@@ -1,90 +1,72 @@
 import { useRef } from 'react'
+import { HandCoins, Smartphone, Mic } from 'lucide-react'
 import { useI18n } from '../../i18n/useI18n'
 import { useScrollTimeline } from '../../hooks/motion'
-
-// Crop words the SMS parser accepts (backend/services/sms_service.py CROP_ALIASES).
-const CROPS = [
-  ['gandum', 'wheat'], ['chawal', 'rice'], ['kapas', 'cotton'], ['makka', 'maize'], ['aloo', 'potato'],
-  ['pyaz', 'onion'], ['tamatar', 'tomato'], ['ganna', 'sugarcane'], ['sarson', 'canola'], ['chana', 'chickpea'],
-  ['lehsan', 'garlic'], ['gajar', 'carrot'], ['aam', 'mango'], ['amrood', 'guava'], ['moongphali', 'groundnut'],
-]
 
 export default function Hero({ onCta }) {
   const { t, lang } = useI18n()
   const sectionRef = useRef(null)
   const photoRef = useRef(null)
+  const bodyRef = useRef(null)
 
+  // Slow parallax on the photograph; the copy lifts away as you scroll.
   useScrollTimeline(sectionRef, p => {
     const q = Math.max(0, (p - 0.5) * 2)
-    if (photoRef.current) photoRef.current.style.transform = `translateY(${q * -8}%) scale(${1.08 - q * 0.04})`
+    if (photoRef.current) photoRef.current.style.transform = `translateY(${q * 12}%) scale(${1.06 + q * 0.04})`
+    if (bodyRef.current) {
+      bodyRef.current.style.transform = `translateY(${-q * 40}px)`
+      bodyRef.current.style.opacity = String(1 - q * 1.2)
+    }
   }, { smoothing: 0.18 })
 
-  // The last sentence of the headline is set in field green.
-  const sentences = t('hero.headline').split(/(?<=[.。۔])\s*/).filter(Boolean)
-  let w = 0
+  // First sentence in white, the promise in italic amber.
+  const [first, ...rest] = t('hero.headline').split(/(?<=[.。۔])\s*/).filter(Boolean)
+
+  const facts = [
+    ['free', HandCoins],
+    ['phone', Smartphone],
+    ['voice', Mic],
+  ]
 
   return (
-    <section id="hero" className="hero theme-mustard" ref={sectionRef}>
-      <div className="container hero-grid">
-        <div className="hero-copy">
-          <div className="hero-meta">
-            <span className="kicker">{t('hero.kicker')}</span>
-          </div>
+    <section id="hero" className="hero" ref={sectionRef}>
+      <div className="hero-photo">
+        <picture>
+          <source media="(max-width: 800px)" srcSet="/images/hero-tractor-1200.jpg" />
+          <img ref={photoRef} src="/images/hero-tractor.jpg" alt="" fetchPriority="high" />
+        </picture>
+      </div>
+      <div className="hero-scrim" />
 
-          <h1 className="hero-title" key={lang}>
-            {sentences.map((s, si) => (
-              <span key={si} className={si === sentences.length - 1 && sentences.length > 1 ? 'accent' : ''}>
-                {s.split(' ').map((word, i, arr) => (
-                  <span key={i} className="word" style={{ animationDelay: `${0.08 + (w++) * 0.05}s` }}>
-                    {word}{i < arr.length - 1 || si < sentences.length - 1 ? ' ' : ''}
-                  </span>
-                ))}
-              </span>
-            ))}
-          </h1>
-
-          <p className="hero-slogan">
-            <span className="slogan-ur" lang="ur" dir="rtl">{t('hero.slogan')}</span>
-            {lang !== 'ur' && <span className="slogan-gloss">{t('hero.sloganGloss')}</span>}
-          </p>
-          <p className="hero-sub">{t('hero.sub')}</p>
-          <div className="hero-actions">
-            <a href="#khata-form" className="btn btn-solid" onClick={onCta}>
-              {t('hero.cta')} <span className="arrow" aria-hidden="true">→</span>
-            </a>
-            <a href="#features" className="link-under">{t('hero.down')} <span aria-hidden="true">↓</span></a>
-          </div>
+      <div className="container hero-body" ref={bodyRef} key={lang}>
+        <p className="eyebrow eyebrow-light">{t('hero.eyebrow')}</p>
+        <h1 className="hero-title">
+          <span className="line">{first}</span>
+          {rest.length > 0 && <em className="line">{rest.join(' ')}</em>}
+        </h1>
+        <p className="hero-ur" lang="ur" dir="rtl">{t('hero.slogan')}</p>
+        <p className="hero-sub">{t('hero.sub')}</p>
+        <div className="hero-actions">
+          <a href="#khata-form" className="btn btn-amber" onClick={onCta}>
+            {t('hero.cta')} <span className="arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="#features" className="btn btn-glass">{t('hero.secondary')}</a>
         </div>
-
-        <figure className="hero-figure">
-          <div className="duotone">
-            <img ref={photoRef} src="/images/hero-farm.jpg" alt="" fetchPriority="high" />
-          </div>
-          <span className="hero-urdu" lang="ur" dir="rtl" aria-hidden="true">کسان کھاتہ</span>
-          <figcaption>
-            <span>{t('hero.figure')}</span>
-            <span>30.16° N · 71.52° E</span>
-          </figcaption>
-          <div className="stamp stamp-bad hero-stamp" aria-hidden="true">
-            <span className="stamp-main">{t('hero.stampMain')}</span>
-            <span className="stamp-sub">{t('hero.stampSub')}</span>
-          </div>
-        </figure>
       </div>
 
-      <div className="ticker theme-soil" aria-label={t('hero.tickerLabel')}>
-        <span className="ticker-label">{t('hero.tickerLabel')}</span>
-        <div className="ticker-window" dir="ltr">
-          <div className="ticker-track">
-            {[0, 1].map(copy => (
-              <span key={copy} className="ticker-set" aria-hidden={copy === 1}>
-                {CROPS.map(([ur, en]) => (
-                  <span key={ur} className="ticker-item"><b>{ur.toUpperCase()}</b> {en}</span>
-                ))}
-              </span>
-            ))}
-          </div>
-        </div>
+      <div className="container hero-foot">
+        <ul className="hero-facts">
+          {facts.map(([k, Icon]) => (
+            <li key={k}>
+              <Icon size={20} strokeWidth={1.75} />
+              <div>
+                <strong>{t(`hero.facts.${k}.title`)}</strong>
+                <span>{t(`hero.facts.${k}.desc`)}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <span className="hero-credit">{t('hero.credit')}</span>
       </div>
     </section>
   )

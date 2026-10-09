@@ -19,7 +19,7 @@ export default function Navbar({ farmer, onLogout }) {
   const [active, setActive] = useState('hero')
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
+    const onScroll = () => setScrolled(window.scrollY > 40)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -48,7 +48,7 @@ export default function Navbar({ farmer, onLogout }) {
 
   return (
     <>
-      <nav className={`navbar${scrolled || farmer ? ' scrolled' : ''}`}>
+      <nav className={`navbar${scrolled || farmer ? ' solid' : ' on-photo'}`}>
         <Link to="/" className="navbar-brand">
           <span className="brand-mark"><Wheat size={19} /></span>
           <span>KisaanKhata</span>

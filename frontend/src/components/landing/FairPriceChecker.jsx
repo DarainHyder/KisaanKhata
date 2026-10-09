@@ -21,17 +21,24 @@ export default function FairPriceChecker() {
   const pct = Math.abs(diff * 100).toFixed(1)
 
   return (
-    <section id="price-check" className="section scale-section theme-soil">
+    <section id="price-check" className="section t-dark price-section">
       <div className="container">
-        <div className="split-head reveal">
+        <header className="section-head reveal">
           <div>
-            <span className="kicker">{t('checker.eyebrow')}</span>
-            <h2 className="display-md">{t('checker.title')}</h2>
+            <p className="eyebrow">{t('checker.eyebrow')}</p>
+            <h2 className="h2">{t('checker.title')}</h2>
           </div>
           <p className="lead">{t('checker.lead')}</p>
-        </div>
+        </header>
 
-        <div className="instrument reveal">
+        <div className="price-grid">
+          <figure className="photo-card reveal">
+            <img src="/images/mandi.jpg" alt="" loading="lazy" />
+            <figcaption>{t('checker.photoCaption')}</figcaption>
+          </figure>
+
+
+          <div className="instrument reveal reveal-d1">
           <div className="inst-readout">
             <div>
               <div className="inst-label">{t('checker.paid')} · {t('checker.perUnit')}</div>
@@ -86,8 +93,9 @@ export default function FairPriceChecker() {
             <p>{t(`checker.${status}.desc`, { gap: fmt(Math.abs(paid - REFERENCE)), pct })}</p>
             <span className="inst-hint">↔ {t('checker.drag')}</span>
           </div>
+            <p className="footnote">{t('checker.note')}</p>
+          </div>
         </div>
-        <p className="footnote">{t('checker.note')}</p>
       </div>
     </section>
   )

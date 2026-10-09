@@ -6,7 +6,8 @@ import api from '../api'
 import { useI18n } from '../i18n/useI18n'
 import { useReveal, prefersReducedMotion } from '../hooks/motion'
 import Hero from '../components/landing/Hero'
-import LiveStats from '../components/landing/LiveStats'
+import Intro from '../components/landing/Intro'
+import QuoteBand from '../components/landing/QuoteBand'
 import ExplodedKhata from '../components/landing/ExplodedKhata'
 import ParseSentence from '../components/landing/ParseSentence'
 import FairPriceChecker from '../components/landing/FairPriceChecker'
@@ -121,27 +122,29 @@ export default function FarmerLogin({ onLogin }) {
   return (
     <div ref={pageRef}>
       <Hero onCta={scrollToForm} />
-      <LiveStats />
+      <Intro />
       <ExplodedKhata />
       <ParseSentence />
+      <QuoteBand />
       <FairPriceChecker />
       <HashChain />
 
       {/* ---------- Open your khata ---------- */}
-      <section id="khata-form" ref={formRef} className="section access-section theme-mustard">
-        <div className="container access">
-          <div className="access-copy reveal">
-            <span className="kicker">{t('access.eyebrow')}</span>
-            <h2 className="display-lg">{t('login.title')}</h2>
-            <p className="lead">{t('login.subtitle')}</p>
-            <ol className="access-points">
-              <li><span>i.</span>{t('access.p1')}</li>
-              <li><span>ii.</span>{t('access.p2')}</li>
-              <li><span>iii.</span>{t('access.p3')}</li>
-            </ol>
-          </div>
+      <section id="khata-form" ref={formRef} className="access-section t-light">
+        <figure className="access-photo">
+          <img src="/images/farmer-field.jpg" alt="" loading="lazy" />
+          <figcaption>
+            <blockquote>{t('access.photoQuote')}</blockquote>
+            <span>{t('access.photoCredit')}</span>
+          </figcaption>
+        </figure>
 
-          <div className="ledger-form reveal reveal-d1">
+        <div className="access-panel">
+          <div className="access-inner reveal">
+            <p className="eyebrow">{t('access.eyebrow')}</p>
+            <h2 className="h2">{t('login.title')}</h2>
+            <p className="lead">{t('login.subtitle')}</p>
+
             <div className="tabs" role="tablist">
               <button type="button" role="tab" aria-selected={mode === 'login'} className={mode === 'login' ? 'active' : ''} onClick={() => switchMode('login')}>
                 {t('login.newAccount')}
@@ -154,52 +157,57 @@ export default function FarmerLogin({ onLogin }) {
             {error && <div className="alert alert-error">{error}</div>}
 
             {mode === 'login' ? (
-              <form onSubmit={handleLogin}>
+              <form onSubmit={handleLogin} className="form">
                 <div className="field">
                   <label htmlFor="phone">{t('login.phoneLabel')}</label>
                   <input id="phone" type="tel" inputMode="tel" placeholder={t('login.phonePlaceholder')} value={phone} onChange={e => setPhone(e.target.value)} required />
                 </div>
-                <div className="field">
-                  <label htmlFor="name">{t('login.nameLabel')}</label>
-                  <input id="name" type="text" placeholder={t('login.namePlaceholder')} value={name} onChange={e => setName(e.target.value)} required minLength={2} />
+                <div className="field-row">
+                  <div className="field">
+                    <label htmlFor="name">{t('login.nameLabel')}</label>
+                    <input id="name" type="text" placeholder={t('login.namePlaceholder')} value={name} onChange={e => setName(e.target.value)} required minLength={2} />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="location">{t('login.locationLabel')}</label>
+                    <input id="location" type="text" placeholder={t('login.locationPlaceholder')} value={location} onChange={e => setLocation(e.target.value)} required />
+                  </div>
                 </div>
-                <div className="field">
-                  <label htmlFor="location">{t('login.locationLabel')}</label>
-                  <input id="location" type="text" placeholder={t('login.locationPlaceholder')} value={location} onChange={e => setLocation(e.target.value)} required />
-                </div>
-                <button className="btn btn-solid btn-block" type="submit" disabled={loading}>
+                <button className="btn btn-dark btn-block" type="submit" disabled={loading}>
                   {loading ? t('login.registering') : t('login.openLedger')} <span className="arrow" aria-hidden="true">→</span>
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleFind}>
+              <form onSubmit={handleFind} className="form">
                 <div className="field">
                   <label htmlFor="find-phone">{t('login.phoneLabel')}</label>
                   <input id="find-phone" type="tel" inputMode="tel" placeholder={t('login.phonePlaceholder')} value={phone} onChange={e => setPhone(e.target.value)} required />
                 </div>
-                <button className="btn btn-solid btn-block" type="submit" disabled={loading}>
+                <button className="btn btn-dark btn-block" type="submit" disabled={loading}>
                   {loading ? t('login.searching') : t('login.findMyKhata')} <span className="arrow" aria-hidden="true">→</span>
                 </button>
-
                 <p className="helper">{t('login.directId')}</p>
                 <div className="id-row">
-                  <div className="field">
-                    <input type="number" inputMode="numeric" min={1} placeholder={t('login.farmerIdPlaceholder')} value={directId} onChange={e => setDirectId(e.target.value)} aria-label={t('login.farmerIdPlaceholder')} />
-                  </div>
+                  <input type="number" inputMode="numeric" min={1} placeholder={t('login.farmerIdPlaceholder')} value={directId} onChange={e => setDirectId(e.target.value)} aria-label={t('login.farmerIdPlaceholder')} />
                   <button type="button" className="btn btn-line" onClick={handleDirectId} disabled={loading}>{t('login.enter')}</button>
                 </div>
               </form>
             )}
+
+            <ul className="access-points">
+              <li><CheckCircle2 size={18} />{t('access.p1')}</li>
+              <li><CheckCircle2 size={18} />{t('access.p2')}</li>
+              <li><CheckCircle2 size={18} />{t('access.p3')}</li>
+            </ul>
           </div>
         </div>
       </section>
 
       {/* ---------- Contact ---------- */}
-      <section id="contact" className="section contact-section theme-soil">
+      <section id="contact" className="section t-light t-tint">
         <div className="container contact-grid">
           <div className="reveal">
-            <span className="kicker">{t('nav.contact')}</span>
-            <h2 className="display-md">{t('contact.title')}</h2>
+            <p className="eyebrow">{t('nav.contact')}</p>
+            <h2 className="h2">{t('contact.title')}</h2>
             <p className="lead">{t('contact.subtitle')}</p>
             <dl className="contact-list">
               <div><dt>{t('contact.smsHelpline')}</dt><dd>{t('contact.smsHelpText')}</dd></div>
@@ -208,24 +216,25 @@ export default function FarmerLogin({ onLogin }) {
             </dl>
           </div>
 
-          <div className="ledger-form reveal reveal-d1">
-            <div className="form-title">{t('contact.or')}</div>
+          <div className="panel reveal reveal-d1">
             {contactSuccess && <div className="alert alert-success"><CheckCircle2 size={18} /><span>{contactSuccess}</span></div>}
             {contactError && <div className="alert alert-error">{contactError}</div>}
-            <form onSubmit={handleContactSubmit}>
-              <div className="field">
-                <label htmlFor="c-name">{t('contact.nameLabel')}</label>
-                <input id="c-name" type="text" placeholder={t('contact.namePlaceholder')} value={contactName} onChange={e => setContactName(e.target.value)} required />
-              </div>
-              <div className="field">
-                <label htmlFor="c-contact">{t('contact.contactLabel')}</label>
-                <input id="c-contact" type="text" placeholder={t('contact.contactPlaceholder')} value={contactContact} onChange={e => setContactContact(e.target.value)} required />
+            <form onSubmit={handleContactSubmit} className="form">
+              <div className="field-row">
+                <div className="field">
+                  <label htmlFor="c-name">{t('contact.nameLabel')}</label>
+                  <input id="c-name" type="text" placeholder={t('contact.namePlaceholder')} value={contactName} onChange={e => setContactName(e.target.value)} required />
+                </div>
+                <div className="field">
+                  <label htmlFor="c-contact">{t('contact.contactLabel')}</label>
+                  <input id="c-contact" type="text" placeholder={t('contact.contactPlaceholder')} value={contactContact} onChange={e => setContactContact(e.target.value)} required />
+                </div>
               </div>
               <div className="field">
                 <label htmlFor="c-msg">{t('contact.messageLabel')}</label>
-                <textarea id="c-msg" rows={3} placeholder={t('contact.messagePlaceholder')} value={contactMessage} onChange={e => setContactMessage(e.target.value)} required />
+                <textarea id="c-msg" rows={5} placeholder={t('contact.messagePlaceholder')} value={contactMessage} onChange={e => setContactMessage(e.target.value)} required />
               </div>
-              <button className="btn btn-line btn-block" type="submit" disabled={contactSubmitting}>
+              <button className="btn btn-dark" type="submit" disabled={contactSubmitting}>
                 {contactSubmitting ? t('contact.sending') : t('contact.send')} <span className="arrow" aria-hidden="true">→</span>
               </button>
             </form>

@@ -230,13 +230,13 @@ export default function ExplodedKhata() {
   useScrollTimeline(sectionRef, render, { mode: 'sticky', smoothing: 0.1 })
 
   return (
-    <section id="features" className="xv theme-field" ref={sectionRef} aria-labelledby="xv-title" style={reduce ? { height: '100svh' } : undefined}>
+    <section id="features" className="xv t-dark" ref={sectionRef} aria-labelledby="xv-title" style={reduce ? { height: '100svh' } : undefined}>
       <div className="xv-stage" ref={stageRef}>
         <div className="xv-grid" aria-hidden="true" />
 
         <header className="xv-head" ref={headRef}>
-          <span className="kicker">{t('exploded.eyebrow')}</span>
-          <h2 id="xv-title" className="display-md">{t('exploded.title')}</h2>
+          <p className="eyebrow">{t('exploded.eyebrow')}</p>
+          <h2 id="xv-title" className="h2">{t('exploded.title')}</h2>
           <p>{t('exploded.lead')}</p>
         </header>
 
