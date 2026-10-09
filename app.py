@@ -87,8 +87,30 @@ app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio", ssr_mode=False)
 # The HF Spaces Gradio SDK imports app.py but does not automatically start a
 # server for a FastAPI object. When running inside a Space, SPACE_ID is set and
 # we start uvicorn explicitly so the backend stays alive and serves traffic.
+def _report_zerogpu_startup() -> None:
+    """
+    ZeroGPU only registers @spaces.GPU functions from inside the patched
+    gr.Blocks.launch(). We serve the mounted FastAPI app with uvicorn instead
+    of launch(), so run that startup hook ourselves; otherwise the Space fails
+    with "No @spaces.GPU function detected during startup".
+    """
+    try:
+        from spaces.config import Config
+        if not Config.zero_gpu:
+            return
+        import spaces.zero as zero
+        from spaces.zero import gradio as zero_gradio
+
+        zero.startup()
+        gr.Blocks.launch = zero_gradio._orig_launch  # hook must run only once
+        print("[ZeroGPU] Startup report sent.")
+    except Exception as exc:  # never block the API from starting
+        print(f"[ZeroGPU] Startup hook skipped: {exc}")
+
+
 if os.getenv("SPACE_ID"):
     import uvicorn  # noqa: E402
 
+    _report_zerogpu_startup()
     uvicorn.run(app, host="0.0.0.0", port=7860)
 

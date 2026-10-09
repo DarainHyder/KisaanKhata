@@ -6,6 +6,7 @@ Handles all CRUD operations for Farmers and LedgerEntries.
 Routes defined here
 -------------------
   POST   /api/ledger/farmers                  — Register a new farmer
+  GET    /api/ledger/farmers/by-phone?phone=  — Find a returning farmer by phone
   GET    /api/ledger/farmers/{id}             — Get a single farmer by ID
   POST   /api/ledger/entry                   — Log a new loan or sale entry
   GET    /api/ledger/{farmer_id}              — List all entries for a farmer (date desc)
@@ -16,6 +17,7 @@ Routes defined here
 """
 
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
@@ -54,6 +56,30 @@ def _get_farmer_or_404(farmer_id: int, db: Session) -> Farmer:
     return farmer
 
 
+def _seal_and_save(entry: LedgerEntry, db: Session) -> LedgerEntry:
+    """
+    Stamp the tamper-evident hash chain and persist the entry.
+
+    Every hashed field must already hold exactly the value the database will
+    hand back later, or verify_farmer_chain() reports a false tamper:
+      - created_at is set here instead of by the column default (which only
+        fires at flush, after the hash would have been computed).
+      - date is stored as naive UTC, because SQLite drops timezone info.
+    """
+    if entry.date is not None and entry.date.tzinfo is not None:
+        entry.date = entry.date.astimezone(timezone.utc).replace(tzinfo=None)
+    entry.created_at = datetime.utcnow()
+
+    prev_hash = get_previous_hash(entry.farmer_id, db)
+    entry.previous_hash = prev_hash
+    entry.entry_hash = compute_entry_hash(entry, prev_hash)
+
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return entry
+
+
 # ===========================================================================
 # Farmer routes
 # ===========================================================================
@@ -81,6 +107,25 @@ def create_farmer(payload: FarmerCreate, db: Session = Depends(get_db)):
     db.add(farmer)
     db.commit()
     db.refresh(farmer)
+    return farmer
+
+
+# Declared before /farmers/{farmer_id} so "by-phone" is not parsed as an ID.
+@router.get("/farmers/by-phone", response_model=FarmerRead)
+def get_farmer_by_phone(
+    phone: str = Query(..., min_length=5, max_length=20, description="Registered phone number."),
+    db: Session = Depends(get_db),
+):
+    """
+    Look up a returning farmer by the phone number they registered with.
+    Returns HTTP 404 if no farmer uses that number.
+    """
+    farmer = db.query(Farmer).filter(Farmer.phone_number == phone.strip()).first()
+    if not farmer:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No farmer is registered with that phone number.",
+        )
     return farmer
 
 
@@ -119,15 +164,7 @@ def create_ledger_entry(payload: LedgerEntryCreate, db: Session = Depends(get_db
         unit=payload.unit,
         date=payload.date,
     )
-    # Stamp tamper-evident hash chain before persisting
-    prev_hash       = get_previous_hash(payload.farmer_id, db)
-    entry.previous_hash = prev_hash
-    entry.entry_hash    = compute_entry_hash(entry, prev_hash)
-
-    db.add(entry)
-    db.commit()
-    db.refresh(entry)
-    return entry
+    return _seal_and_save(entry, db)
 
 
 @router.get("/{farmer_id}", response_model=list[LedgerEntryRead])
@@ -301,12 +338,4 @@ def voice_entry_confirm(
         unit=payload.unit,
         date=payload.date,
     )
-    # Stamp tamper-evident hash chain before persisting
-    prev_hash           = get_previous_hash(payload.farmer_id, db)
-    entry.previous_hash = prev_hash
-    entry.entry_hash    = compute_entry_hash(entry, prev_hash)
-
-    db.add(entry)
-    db.commit()
-    db.refresh(entry)
-    return entry
+    return _seal_and_save(entry, db)

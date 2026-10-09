@@ -4,147 +4,129 @@ import { Wheat, Menu, X, LayoutDashboard, Mic, History, LogOut } from 'lucide-re
 import { useI18n } from '../i18n/useI18n'
 import LanguageSwitcher from './LanguageSwitcher'
 
+const SECTIONS = [
+  ['hero', 'nav.home'],
+  ['features', 'nav.features'],
+  ['how-it-works', 'nav.howItWorks'],
+  ['price-check', 'nav.priceCheck'],
+  ['contact', 'nav.contact'],
+]
+
 export default function Navbar({ farmer, onLogout }) {
   const { t } = useI18n()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [active, setActive] = useState('hero')
 
   useEffect(() => {
-    function handleScroll() {
-      if (window.scrollY > 20) {
-        setScrolled(true)
-      } else {
-        setScrolled(false)
-      }
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // Highlight the landing section currently in view.
+  useEffect(() => {
+    if (farmer) return
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id) })
+    }, { rootMargin: '-45% 0px -50% 0px' })
+    // Sections without a nav link still need observing so the highlight clears over them.
+    ;[...SECTIONS.map(([id]) => id), 'integrity', 'khata-form'].forEach(id => {
+      const el = document.getElementById(id)
+      if (el) io.observe(el)
+    })
+    return () => io.disconnect()
+  }, [farmer])
+
+  const close = () => setMobileMenuOpen(false)
+  const appLinks = [
+    ['/', 'nav.dashboard', LayoutDashboard],
+    ['/voice', 'nav.addVoiceEntry', Mic],
+    ['/history', 'nav.ledgerHistory', History],
+  ]
 
   return (
     <>
-      {/* Top Persistent Bar */}
       <nav className={`navbar${scrolled || farmer ? ' scrolled' : ''}`}>
         <Link to="/" className="navbar-brand">
-          <Wheat size={24} color="var(--accent-gold)" />
+          <span className="brand-mark"><Wheat size={19} /></span>
           <span>{t('brand')}</span>
         </Link>
 
-        {/* Desktop Links & CTA */}
         {farmer ? (
           <div className="navbar-links">
-            <LanguageSwitcher />
-            <div style={{ fontSize: '0.88rem', color: 'rgba(237, 234, 224, 0.85)', fontWeight: 500 }}>
-              {t('nav.farmer')}: <strong style={{ color: 'var(--accent-gold)' }}>{farmer.name}</strong>
+            <div className="app-links">
+              {appLinks.map(([to, key, Icon]) => (
+                <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `app-link${isActive ? ' active' : ''}`}>
+                  <Icon size={16} /><span>{t(key)}</span>
+                </NavLink>
+              ))}
             </div>
-            <button className="btn-logout" onClick={onLogout} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <LogOut size={16} />
-              <span>{t('nav.logout')}</span>
+            <LanguageSwitcher />
+            <div className="nav-farmer">{t('nav.farmer')}: <strong>{farmer.name}</strong></div>
+            <button className="btn-logout" onClick={onLogout}>
+              <LogOut size={15} /><span>{t('nav.logout')}</span>
             </button>
           </div>
         ) : (
           <div className="navbar-links">
-            <a href="#hero" className="nav-link">{t('nav.home')}</a>
-            <a href="#how-it-works" className="nav-link">{t('nav.howItWorks')}</a>
-            <a href="#features" className="nav-link">{t('nav.features')}</a>
-            <a href="#contact" className="nav-link">{t('nav.contact')}</a>
+            {SECTIONS.map(([id, key]) => (
+              <a key={id} href={`#${id}`} className={`nav-link${active === id ? ' active' : ''}`}>{t(key)}</a>
+            ))}
             <LanguageSwitcher />
-            <a href="#khata-form" className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '0.88rem', width: 'auto' }}>
+            <a href="#khata-form" className="btn btn-primary btn-inline" style={{ padding: '9px 18px', fontSize: '0.88rem' }}>
               {t('nav.accessLedger')}
             </a>
           </div>
         )}
 
-        {/* Mobile Hamburger Button */}
-        <button
-          className="mobile-menu-btn"
-          onClick={() => setMobileMenuOpen(true)}
-          aria-label={t('nav.openMenu')}
-        >
-          <Menu size={26} />
+        <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} aria-label={t('nav.openMenu')}>
+          <Menu size={22} />
         </button>
       </nav>
 
-      {/* Mobile Slide-In Panel Overlay */}
-      <div
-        className={`mobile-menu-overlay${mobileMenuOpen ? ' open' : ''}`}
-        onClick={() => setMobileMenuOpen(false)}
-      />
+      <div className={`mobile-menu-overlay${mobileMenuOpen ? ' open' : ''}`} onClick={close} />
 
-      {/* Mobile Slide-In Panel */}
-      <aside className={`mobile-menu-panel${mobileMenuOpen ? ' open' : ''}`}>
+      <aside className={`mobile-menu-panel${mobileMenuOpen ? ' open' : ''}`} aria-hidden={!mobileMenuOpen}>
         <div className="mobile-menu-header">
-          <div className="navbar-brand" style={{ color: 'var(--text)' }}>
-            <Wheat size={22} color="var(--accent-gold)" />
+          <div className="navbar-brand">
+            <span className="brand-mark"><Wheat size={19} /></span>
             <span>{t('brand')}</span>
           </div>
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            aria-label={t('nav.closeMenu')}
-            style={{ background: 'transparent', border: 'none', color: 'var(--text)', cursor: 'pointer', padding: 4 }}
-          >
-            <X size={24} />
-          </button>
+          <button className="icon-btn" onClick={close} aria-label={t('nav.closeMenu')}><X size={24} /></button>
         </div>
 
         <div className="mobile-menu-links">
           <LanguageSwitcher variant="compact" />
           {farmer ? (
             <>
-              <div style={{ fontSize: '0.9rem', color: 'var(--soil-brown)', paddingBottom: 12, borderBottom: 'var(--ledger-line)' }}>
-                {t('nav.loggedInAs')} <strong>{farmer.name}</strong> ({farmer.location})
-              </div>
-              <NavLink to="/" end className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.dashboard')}
-              </NavLink>
-              <NavLink to="/voice" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.addVoiceEntry')}
-              </NavLink>
-              <NavLink to="/history" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
-                {t('nav.ledgerHistory')}
-              </NavLink>
-              <button
-                className="btn btn-outline"
-                style={{ marginTop: 20 }}
-                onClick={() => { onLogout(); setMobileMenuOpen(false); }}
-              >
-                {t('nav.logout')}
+              <div className="mobile-farmer">{t('nav.loggedInAs')} <strong>{farmer.name}</strong>{farmer.location ? ` (${farmer.location})` : ''}</div>
+              {appLinks.map(([to, key]) => (
+                <NavLink key={to} to={to} end={to === '/'} className="mobile-nav-link" onClick={close}>{t(key)}</NavLink>
+              ))}
+              <button className="btn btn-outline" style={{ marginTop: 20 }} onClick={() => { onLogout(); close() }}>
+                <LogOut size={16} />{t('nav.logout')}
               </button>
             </>
           ) : (
             <>
-              <a href="#hero" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.home')}</a>
-              <a href="#how-it-works" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.howItWorks')}</a>
-              <a href="#features" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.features')}</a>
-              <a href="#contact" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.contact')}</a>
-              <a
-                href="#khata-form"
-                className="btn btn-primary"
-                style={{ marginTop: 16 }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t('nav.accessLedger')}
-              </a>
+              {SECTIONS.map(([id, key]) => (
+                <a key={id} href={`#${id}`} className="mobile-nav-link" onClick={close}>{t(key)}</a>
+              ))}
+              <a href="#khata-form" className="btn btn-primary" style={{ marginTop: 16 }} onClick={close}>{t('nav.accessLedger')}</a>
             </>
           )}
         </div>
       </aside>
 
-      {/* Bottom tab navigation for App Screens when logged in */}
       {farmer && (
-        <nav className="tab-nav">
-          <NavLink to="/" end className={({ isActive }) => `tab-btn${isActive ? ' active' : ''}`}>
-            <LayoutDashboard size={20} />
-            <span>{t('nav.dashboard')}</span>
-          </NavLink>
-          <NavLink to="/voice" className={({ isActive }) => `tab-btn${isActive ? ' active' : ''}`}>
-            <Mic size={20} />
-            <span>{t('nav.addVoiceEntry')}</span>
-          </NavLink>
-          <NavLink to="/history" className={({ isActive }) => `tab-btn${isActive ? ' active' : ''}`}>
-            <History size={20} />
-            <span>{t('nav.ledgerHistory')}</span>
-          </NavLink>
+        <nav className="tab-nav" aria-label={t('nav.dashboard')}>
+          {appLinks.map(([to, , Icon]) => (
+            <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `tab-btn${isActive ? ' active' : ''}`}>
+              <Icon size={18} /><span>{t(`nav.short.${to === '/' ? 'home' : to.slice(1)}`)}</span>
+            </NavLink>
+          ))}
         </nav>
       )}
     </>

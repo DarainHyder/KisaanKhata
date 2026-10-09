@@ -1,3 +1,5 @@
+import extra from './translations.extra'
+
 export const LANGUAGES = {
   en: { label: 'English', dir: 'ltr', font: "'Work Sans', sans-serif" },
   ur: { label: 'اردو', dir: 'rtl', font: "'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Work Sans', serif" },
@@ -628,5 +630,18 @@ const translations = {
     },
   },
 }
+
+function deepMerge(base, add) {
+  for (const [k, v] of Object.entries(add)) {
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      base[k] = deepMerge(base[k] && typeof base[k] === 'object' ? base[k] : {}, v)
+    } else {
+      base[k] = v
+    }
+  }
+  return base
+}
+
+for (const code of Object.keys(extra)) deepMerge(translations[code], extra[code])
 
 export default translations

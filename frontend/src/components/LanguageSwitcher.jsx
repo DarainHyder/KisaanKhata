@@ -6,18 +6,11 @@ export default function LanguageSwitcher({ variant = 'default' }) {
   const isCompact = variant === 'compact'
 
   return (
-    <div className={`language-switcher ${isCompact ? 'compact' : ''}`}>
-      <Globe size={isCompact ? 16 : 18} />
-      {!isCompact && <span className="language-label">{t('language.label')}</span>}
-      <select
-        value={lang}
-        onChange={e => setLang(e.target.value)}
-        aria-label={t('language.select')}
-      >
+    <div className={`language-switcher${isCompact ? ' compact' : ''}`} style={isCompact ? { alignSelf: 'flex-start', marginBottom: 8 } : undefined}>
+      <Globe size={16} />
+      <select value={lang} onChange={e => setLang(e.target.value)} aria-label={t('language.select')}>
         {Object.entries(languages).map(([code, meta]) => (
-          <option key={code} value={code}>
-            {meta.label}
-          </option>
+          <option key={code} value={code}>{meta.label}</option>
         ))}
       </select>
     </div>
