@@ -1,18 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
+import { CheckCircle2 } from 'lucide-react'
 import api from '../api'
 import { useI18n } from '../i18n/useI18n'
 import { useReveal, prefersReducedMotion } from '../hooks/motion'
 import Hero from '../components/landing/Hero'
 import LiveStats from '../components/landing/LiveStats'
-import KhataBurst from '../components/landing/KhataBurst'
-import HowItWorks from '../components/landing/HowItWorks'
+import ExplodedKhata from '../components/landing/ExplodedKhata'
+import ParseSentence from '../components/landing/ParseSentence'
 import FairPriceChecker from '../components/landing/FairPriceChecker'
 import HashChain from '../components/landing/HashChain'
-import {
-  Phone, MapPin, User, CheckCircle2, Send, HelpCircle, ShieldCheck, MessageSquareText, Hash,
-} from 'lucide-react'
 
 export default function FarmerLogin({ onLogin }) {
   const { t, lang } = useI18n()
@@ -38,7 +36,7 @@ export default function FarmerLogin({ onLogin }) {
   // Inertial smooth scrolling for the landing page only.
   useEffect(() => {
     if (prefersReducedMotion()) return
-    const lenis = new Lenis({ autoRaf: true, anchors: { offset: -68 }, lerp: 0.1 })
+    const lenis = new Lenis({ autoRaf: true, anchors: { offset: -64 }, lerp: 0.1 })
     return () => lenis.destroy()
   }, [])
 
@@ -124,27 +122,27 @@ export default function FarmerLogin({ onLogin }) {
     <div ref={pageRef}>
       <Hero onCta={scrollToForm} />
       <LiveStats />
-      <KhataBurst />
-      <HowItWorks />
+      <ExplodedKhata />
+      <ParseSentence />
       <FairPriceChecker />
       <HashChain />
 
       {/* ---------- Open your khata ---------- */}
-      <section id="khata-form" ref={formRef} className="section">
+      <section id="khata-form" ref={formRef} className="section access-section">
         <div className="container access">
           <div className="access-copy reveal">
-            <span className="eyebrow">{t('access.eyebrow')}</span>
-            <h2 className="section-title">{t('login.title')}</h2>
-            <p className="section-lead">{t('login.subtitle')}</p>
-            <ul className="access-points">
-              <li><CheckCircle2 size={18} /><span>{t('access.p1')}</span></li>
-              <li><CheckCircle2 size={18} /><span>{t('access.p2')}</span></li>
-              <li><CheckCircle2 size={18} /><span>{t('access.p3')}</span></li>
-            </ul>
+            <span className="kicker">{t('access.eyebrow')}</span>
+            <h2 className="display-lg">{t('login.title')}</h2>
+            <p className="lead">{t('login.subtitle')}</p>
+            <ol className="access-points">
+              <li><span>i.</span>{t('access.p1')}</li>
+              <li><span>ii.</span>{t('access.p2')}</li>
+              <li><span>iii.</span>{t('access.p3')}</li>
+            </ol>
           </div>
 
-          <div className="card access-card reveal reveal-d1">
-            <div className="segmented" role="tablist">
+          <div className="ledger-form reveal reveal-d1">
+            <div className="tabs" role="tablist">
               <button type="button" role="tab" aria-selected={mode === 'login'} className={mode === 'login' ? 'active' : ''} onClick={() => switchMode('login')}>
                 {t('login.newAccount')}
               </button>
@@ -157,39 +155,38 @@ export default function FarmerLogin({ onLogin }) {
 
             {mode === 'login' ? (
               <form onSubmit={handleLogin}>
-                <div className="form-group">
-                  <label htmlFor="phone"><Phone size={14} />{t('login.phoneLabel')}</label>
+                <div className="field">
+                  <label htmlFor="phone">{t('login.phoneLabel')}</label>
                   <input id="phone" type="tel" inputMode="tel" placeholder={t('login.phonePlaceholder')} value={phone} onChange={e => setPhone(e.target.value)} required />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="name"><User size={14} />{t('login.nameLabel')}</label>
+                <div className="field">
+                  <label htmlFor="name">{t('login.nameLabel')}</label>
                   <input id="name" type="text" placeholder={t('login.namePlaceholder')} value={name} onChange={e => setName(e.target.value)} required minLength={2} />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="location"><MapPin size={14} />{t('login.locationLabel')}</label>
+                <div className="field">
+                  <label htmlFor="location">{t('login.locationLabel')}</label>
                   <input id="location" type="text" placeholder={t('login.locationPlaceholder')} value={location} onChange={e => setLocation(e.target.value)} required />
                 </div>
-                <button className="btn btn-primary" type="submit" disabled={loading}>
-                  {loading ? t('login.registering') : t('login.openLedger')}
+                <button className="btn btn-solid btn-block" type="submit" disabled={loading}>
+                  {loading ? t('login.registering') : t('login.openLedger')} <span className="arrow" aria-hidden="true">→</span>
                 </button>
               </form>
             ) : (
               <form onSubmit={handleFind}>
-                <div className="form-group">
-                  <label htmlFor="find-phone"><Phone size={14} />{t('login.phoneLabel')}</label>
+                <div className="field">
+                  <label htmlFor="find-phone">{t('login.phoneLabel')}</label>
                   <input id="find-phone" type="tel" inputMode="tel" placeholder={t('login.phonePlaceholder')} value={phone} onChange={e => setPhone(e.target.value)} required />
                 </div>
-                <button className="btn btn-primary" type="submit" disabled={loading}>
-                  {loading ? t('login.searching') : t('login.findMyKhata')}
+                <button className="btn btn-solid btn-block" type="submit" disabled={loading}>
+                  {loading ? t('login.searching') : t('login.findMyKhata')} <span className="arrow" aria-hidden="true">→</span>
                 </button>
 
-                <hr className="divider" />
                 <p className="helper">{t('login.directId')}</p>
                 <div className="id-row">
-                  <input type="number" inputMode="numeric" min={1} placeholder={t('login.farmerIdPlaceholder')} value={directId} onChange={e => setDirectId(e.target.value)} aria-label={t('login.farmerIdPlaceholder')} />
-                  <button type="button" className="btn btn-secondary" onClick={handleDirectId} disabled={loading}>
-                    <Hash size={16} />{t('login.enter')}
-                  </button>
+                  <div className="field">
+                    <input type="number" inputMode="numeric" min={1} placeholder={t('login.farmerIdPlaceholder')} value={directId} onChange={e => setDirectId(e.target.value)} aria-label={t('login.farmerIdPlaceholder')} />
+                  </div>
+                  <button type="button" className="btn btn-line" onClick={handleDirectId} disabled={loading}>{t('login.enter')}</button>
                 </div>
               </form>
             )}
@@ -198,52 +195,40 @@ export default function FarmerLogin({ onLogin }) {
       </section>
 
       {/* ---------- Contact ---------- */}
-      <section id="contact" className="section" style={{ paddingTop: 0 }}>
-        <div className="container">
-          <div className="section-head reveal">
-            <span className="eyebrow">{t('nav.contact')}</span>
-            <h2 className="section-title">{t('contact.title')}</h2>
-            <p className="section-lead">{t('contact.subtitle')}</p>
+      <section id="contact" className="section contact-section">
+        <div className="container contact-grid">
+          <div className="reveal">
+            <span className="kicker">{t('nav.contact')}</span>
+            <h2 className="display-md">{t('contact.title')}</h2>
+            <p className="lead">{t('contact.subtitle')}</p>
+            <dl className="contact-list">
+              <div><dt>{t('contact.smsHelpline')}</dt><dd>{t('contact.smsHelpText')}</dd></div>
+              <div><dt>{t('contact.institutional')}</dt><dd>{t('contact.institutionalText')}</dd></div>
+              <div><dt>{t('contact.supportHours')}</dt><dd>{t('contact.supportHoursText')}</dd></div>
+            </dl>
           </div>
 
-          <div className="contact-grid">
-            <div className="card reveal" style={{ marginBottom: 0 }}>
-              {contactSuccess && <div className="alert alert-success"><CheckCircle2 size={18} /><span>{contactSuccess}</span></div>}
-              {contactError && <div className="alert alert-error">{contactError}</div>}
-              <form onSubmit={handleContactSubmit}>
-                <div className="form-group">
-                  <label htmlFor="c-name">{t('contact.nameLabel')}</label>
-                  <input id="c-name" type="text" placeholder={t('contact.namePlaceholder')} value={contactName} onChange={e => setContactName(e.target.value)} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="c-contact">{t('contact.contactLabel')}</label>
-                  <input id="c-contact" type="text" placeholder={t('contact.contactPlaceholder')} value={contactContact} onChange={e => setContactContact(e.target.value)} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="c-msg">{t('contact.messageLabel')}</label>
-                  <textarea id="c-msg" rows={4} placeholder={t('contact.messagePlaceholder')} value={contactMessage} onChange={e => setContactMessage(e.target.value)} required />
-                </div>
-                <button className="btn btn-primary" type="submit" disabled={contactSubmitting}>
-                  <Send size={16} />
-                  <span>{contactSubmitting ? t('contact.sending') : t('contact.send')}</span>
-                </button>
-              </form>
-            </div>
-
-            <div className="contact-info">
-              <div className="contact-info-item reveal">
-                <div className="ci-icon"><MessageSquareText size={20} /></div>
-                <div><strong>{t('contact.smsHelpline')}</strong><span>{t('contact.smsHelpText')}</span></div>
+          <div className="ledger-form reveal reveal-d1">
+            <div className="form-title">{t('contact.or')}</div>
+            {contactSuccess && <div className="alert alert-success"><CheckCircle2 size={18} /><span>{contactSuccess}</span></div>}
+            {contactError && <div className="alert alert-error">{contactError}</div>}
+            <form onSubmit={handleContactSubmit}>
+              <div className="field">
+                <label htmlFor="c-name">{t('contact.nameLabel')}</label>
+                <input id="c-name" type="text" placeholder={t('contact.namePlaceholder')} value={contactName} onChange={e => setContactName(e.target.value)} required />
               </div>
-              <div className="contact-info-item reveal reveal-d1">
-                <div className="ci-icon"><ShieldCheck size={20} /></div>
-                <div><strong>{t('contact.institutional')}</strong><span>{t('contact.institutionalText')}</span></div>
+              <div className="field">
+                <label htmlFor="c-contact">{t('contact.contactLabel')}</label>
+                <input id="c-contact" type="text" placeholder={t('contact.contactPlaceholder')} value={contactContact} onChange={e => setContactContact(e.target.value)} required />
               </div>
-              <div className="contact-info-item reveal reveal-d2">
-                <div className="ci-icon"><HelpCircle size={20} /></div>
-                <div><strong>{t('contact.supportHours')}</strong><span>{t('contact.supportHoursText')}</span></div>
+              <div className="field">
+                <label htmlFor="c-msg">{t('contact.messageLabel')}</label>
+                <textarea id="c-msg" rows={3} placeholder={t('contact.messagePlaceholder')} value={contactMessage} onChange={e => setContactMessage(e.target.value)} required />
               </div>
-            </div>
+              <button className="btn btn-line btn-block" type="submit" disabled={contactSubmitting}>
+                {contactSubmitting ? t('contact.sending') : t('contact.send')} <span className="arrow" aria-hidden="true">→</span>
+              </button>
+            </form>
           </div>
         </div>
       </section>

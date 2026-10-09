@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { Lock, Sprout, ShieldCheck, ShieldAlert, Pencil, RotateCcw } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useI18n } from '../../i18n/useI18n'
-import { useReveal } from '../../hooks/motion'
 
 // Mirrors backend/services/integrity.py: each entry hashes its own fields plus
 // the previous entry's hash, so editing one entry breaks every link after it.
@@ -23,17 +21,13 @@ async function sha256(text) {
   return (h >>> 0).toString(16).padStart(8, '0').repeat(8)
 }
 const canonical = (e, prev) => [1, e.type, e.amount, e.crop, e.unit, e.date, e.price, prev].join('|')
-const short = h => (h ? `${h.slice(0, 4)}…${h.slice(-4)}` : '…')
+const short = h => (h ? `${h.slice(0, 6)}…${h.slice(-4)}` : '……')
 
 export default function HashChain() {
   const { t } = useI18n()
-  const rootRef = useRef(null)
-  const [stored, setStored] = useState([])     // hashes written when the entries were created
-  const [current, setCurrent] = useState([])   // hashes recomputed from what is in the table now
+  const [stored, setStored] = useState([])
+  const [current, setCurrent] = useState([])
   const [tampered, setTampered] = useState(false)
-  const [shake, setShake] = useState(false)
-
-  useReveal(rootRef)
 
   useEffect(() => {
     (async () => {
@@ -48,76 +42,72 @@ export default function HashChain() {
   async function toggle() {
     if (tampered) { setCurrent(stored); setTampered(false); return }
     const forged = { ...ENTRIES[0], amount: TAMPERED_AMOUNT }
-    const recomputed = [await sha256(canonical(forged, 'GENESIS')), ...stored.slice(1)]
-    setCurrent(recomputed)
+    setCurrent([await sha256(canonical(forged, 'GENESIS')), ...stored.slice(1)])
     setTampered(true)
-    setShake(true)
-    setTimeout(() => setShake(false), 500)
   }
 
-  const brokenFrom = tampered ? 1 : null
-
   return (
-    <section id="integrity" className="section" ref={rootRef}>
+    <section id="integrity" className="section">
       <div className="container">
-        <div className="section-head center reveal">
-          <span className="eyebrow">{t('chain.eyebrow')}</span>
-          <h2 className="section-title">{t('chain.title')}</h2>
-          <p className="section-lead">{t('chain.lead')}</p>
+        <div className="split-head reveal">
+          <div>
+            <span className="kicker">{t('chain.eyebrow')}</span>
+            <h2 className="display-md">{t('chain.title')}</h2>
+          </div>
+          <p className="lead">{t('chain.lead')}</p>
         </div>
 
-        <div className="chain reveal">
-          <div className="chain-cell">
-            <div className="chain-block">
-              <div className="cb-head">
-                <span className="cb-title">{t('chain.genesis')}</span>
-                <Sprout size={18} className="cb-icon" />
-              </div>
-              <div className="cb-meta">{t('chain.genesisMeta')}</div>
-              <div className="cb-hash"><span>prev </span>GENESIS</div>
-            </div>
-            <div className="chain-link" />
+        <div className="reveal">
+        <div className={`ledger-table${tampered ? ' is-tampered' : ''}`} role="table">
+          <div className="lt-row lt-head" role="row">
+            <span role="columnheader">{t('chain.col.no')}</span>
+            <span role="columnheader">{t('chain.col.entry')}</span>
+            <span role="columnheader" className="num">{t('chain.col.amount')}</span>
+            <span role="columnheader">{t('chain.col.prev')}</span>
+            <span role="columnheader">{t('chain.col.hash')}</span>
+            <span role="columnheader">{t('chain.col.status')}</span>
+          </div>
+
+          <div className="lt-row lt-genesis" role="row">
+            <span>0</span>
+            <span>{t('chain.genesis')}</span>
+            <span className="num">—</span>
+            <span className="mono">—</span>
+            <span className="mono">GENESIS</span>
+            <span className="lt-status ok">{t('chain.ok')}</span>
           </div>
 
           {ENTRIES.map((e, i) => {
-            const isSrc = tampered && i === 0
-            const isBroken = brokenFrom !== null && e.id > brokenFrom
-            const cls = isSrc ? ' tampered-src' : isBroken ? ' broken' : ''
+            const edited = tampered && i === 0
+            const broken = tampered && i > 0
             return (
-              <div key={e.id} className="chain-cell">
-                <div className={`chain-block${cls}${isSrc && shake ? ' shake' : ''}`}>
-                  <div className="cb-head">
-                    <span className="cb-title">{t('chain.entry')} {e.id}</span>
-                    {isSrc ? <Pencil size={18} className="cb-icon" style={{ color: 'var(--wheat)' }} /> : <Lock size={18} className="cb-icon" />}
-                  </div>
-                  <div className="cb-meta">
-                    {e.type === 'loan' ? t('chain.loan') : `${t('chain.sale')} · ${t(`chain.crops.${e.crop}`)}`}
-                    {' · '}
-                    <span className="num-mono">
-                      {isSrc
-                        ? <><s style={{ opacity: 0.6 }}>{e.amount.toLocaleString('en-US')}</s> {TAMPERED_AMOUNT.toLocaleString('en-US')}</>
-                        : e.amount.toLocaleString('en-US')}
-                    </span>
-                  </div>
-                  <div className="cb-hash">
-                    <span>hash </span>{short(current[i])}
-                    {isSrc && <div style={{ color: 'var(--faint)', marginTop: 4 }}>{t('chain.stored')} {short(stored[i])}</div>}
-                  </div>
-                </div>
-                {i < ENTRIES.length - 1 && <div className={`chain-link${tampered ? ' broken' : ''}`} />}
+              <div key={e.id} className={`lt-row${edited ? ' edited' : ''}${broken ? ' broken' : ''}`} role="row">
+                <span>{e.id}</span>
+                <span>{e.type === 'loan' ? t('chain.loan') : `${t('chain.sale')} · ${t(`chain.crops.${e.crop}`)}`}</span>
+                <span className="num">
+                  {edited ? (
+                    <><s>{e.amount.toLocaleString('en-US')}</s><em className="ink">{TAMPERED_AMOUNT.toLocaleString('en-US')}</em></>
+                  ) : e.amount.toLocaleString('en-US')}
+                </span>
+                <span className="mono prev">{i === 0 ? 'GENESIS' : short(stored[i - 1])}</span>
+                <span className="mono hash">{short(current[i])}</span>
+                <span className={`lt-status ${edited ? 'edited' : broken ? 'bad' : 'ok'}`}>
+                  {edited ? t('chain.edited') : broken ? t('chain.bad') : t('chain.ok')}
+                </span>
               </div>
             )
           })}
+
+          {tampered && <div className="stamp stamp-underpaid table-stamp"><span className="stamp-main">{t('chain.stamp')}</span><span className="stamp-sub">#1 → #3</span></div>}
+        </div>
         </div>
 
-        <div className={`chain-status reveal ${tampered ? 'bad' : 'ok'}`} aria-live="polite">
-          <div className="cs-text">
-            {tampered ? <ShieldAlert size={20} /> : <ShieldCheck size={20} />}
-            <span>{tampered ? t('chain.broken') : t('chain.intact', { count: ENTRIES.length })}</span>
-          </div>
-          <button type="button" className={`btn ${tampered ? 'btn-outline' : 'btn-primary'}`} onClick={toggle} disabled={!stored.length}>
-            {tampered ? <RotateCcw size={16} /> : <Pencil size={16} />}
-            <span>{tampered ? t('chain.restore') : t('chain.tamper')}</span>
+        <div className="chain-foot">
+          <p className={`chain-verdict ${tampered ? 'bad' : 'ok'}`} aria-live="polite">
+            {tampered ? t('chain.broken') : t('chain.intact', { count: ENTRIES.length })}
+          </p>
+          <button type="button" className={`btn ${tampered ? 'btn-line' : 'btn-solid'}`} onClick={toggle} disabled={!stored.length}>
+            {tampered ? t('chain.restore') : t('chain.tamper')}
           </button>
         </div>
       </div>

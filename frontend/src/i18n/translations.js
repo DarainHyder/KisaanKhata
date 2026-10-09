@@ -1,4 +1,5 @@
 import extra from './translations.extra'
+import v2 from './translations.v2'
 
 export const LANGUAGES = {
   en: { label: 'English', dir: 'ltr', font: "'Work Sans', sans-serif" },
@@ -643,5 +644,6 @@ function deepMerge(base, add) {
 }
 
 for (const code of Object.keys(extra)) deepMerge(translations[code], extra[code])
+for (const code of Object.keys(v2)) deepMerge(translations[code], v2[code])
 
 export default translations

@@ -3,13 +3,12 @@ import { rootApi } from '../../api'
 import { useI18n } from '../../i18n/useI18n'
 import { useCountUp } from '../../hooks/motion'
 
-function Stat({ value, suffix = '', label, decimals = 0 }) {
+function Stat({ value, suffix = '', label, index }) {
   const v = useCountUp(value)
   return (
     <div className="stat">
-      <div className="stat-value">
-        {value === null ? '—' : v.toLocaleString('en-US', { maximumFractionDigits: decimals, minimumFractionDigits: decimals })}{suffix}
-      </div>
+      <span className="stat-index">{String(index + 1).padStart(2, '0')}</span>
+      <div className="stat-value">{Math.round(v).toLocaleString('en-US')}<small>{suffix}</small></div>
       <div className="stat-label">{label}</div>
     </div>
   )
@@ -46,7 +45,7 @@ export default function LiveStats() {
     <section className="stats-band" aria-label={t('stats.aria')}>
       <div className="container">
         <div className="stats-grid">
-          {items.map(it => <Stat key={it.label} {...it} />)}
+          {items.map((it, i) => <Stat key={it.label} index={i} {...it} />)}
         </div>
         <div className="stats-note">
           {live ? <><span className="live-dot" />{t('stats.liveNote')}</> : t('stats.engineNote')}

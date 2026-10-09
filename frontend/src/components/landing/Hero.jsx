@@ -1,7 +1,13 @@
 import { useRef } from 'react'
-import { ArrowRight, Mic, ShieldCheck, MessageSquareText, Scale } from 'lucide-react'
 import { useI18n } from '../../i18n/useI18n'
 import { useScrollTimeline } from '../../hooks/motion'
+
+// Crop words the SMS parser accepts (backend/services/sms_service.py CROP_ALIASES).
+const CROPS = [
+  ['gandum', 'wheat'], ['chawal', 'rice'], ['kapas', 'cotton'], ['makka', 'maize'], ['aloo', 'potato'],
+  ['pyaz', 'onion'], ['tamatar', 'tomato'], ['ganna', 'sugarcane'], ['sarson', 'canola'], ['chana', 'chickpea'],
+  ['lehsan', 'garlic'], ['gajar', 'carrot'], ['aam', 'mango'], ['amrood', 'guava'], ['moongphali', 'groundnut'],
+]
 
 export default function Hero({ onCta }) {
   const { t, lang } = useI18n()
@@ -9,17 +15,15 @@ export default function Hero({ onCta }) {
   const mediaRef = useRef(null)
   const innerRef = useRef(null)
 
-  // Parallax: the field drifts slower than the page, the copy lifts and fades.
   useScrollTimeline(sectionRef, p => {
     const q = Math.max(0, (p - 0.5) * 2)
-    if (mediaRef.current) mediaRef.current.style.transform = `translateY(${q * 18}%) scale(${1 + q * 0.08})`
-    if (innerRef.current) {
-      innerRef.current.style.transform = `translateY(${-q * 60}px)`
-      innerRef.current.style.opacity = 1 - q * 1.3
-    }
+    if (mediaRef.current) mediaRef.current.style.transform = `translateY(${q * 14}%) scale(${1.04 + q * 0.06})`
+    if (innerRef.current) innerRef.current.style.transform = `translateY(${-q * 50}px)`
   }, { smoothing: 0.18 })
 
-  const words = t('hero.headline').split(' ')
+  // The last sentence of the headline is set in italic gold.
+  const sentences = t('hero.headline').split(/(?<=[.。۔])\s*/).filter(Boolean)
+  let w = 0
 
   return (
     <section id="hero" className="hero" ref={sectionRef}>
@@ -29,33 +33,47 @@ export default function Hero({ onCta }) {
       <div className="hero-shade" />
 
       <div className="container hero-inner" ref={innerRef}>
-        <span className="eyebrow">{t('hero.eyebrow')}</span>
+        <div className="hero-meta">
+          <span className="kicker">{t('hero.kicker')}</span>
+          <span className="hero-coords">30.1575° N · 71.5249° E</span>
+        </div>
+
         <h1 className="hero-title" key={lang}>
-          {words.map((w, i) => (
-            <span key={i} className="word" style={{ animationDelay: `${0.15 + i * 0.07}s` }}>
-              {w}{i < words.length - 1 ? ' ' : ''}
+          {sentences.map((s, si) => (
+            <span key={si} className={si === sentences.length - 1 && sentences.length > 1 ? 'accent' : ''}>
+              {s.split(' ').map((word, i, arr) => (
+                <span key={i} className="word" style={{ animationDelay: `${0.1 + (w++) * 0.06}s` }}>
+                  {word}{i < arr.length - 1 || si < sentences.length - 1 ? ' ' : ''}
+                </span>
+              ))}
             </span>
           ))}
         </h1>
-        <p className="hero-sub">{t('hero.sub')}</p>
-        <div className="hero-actions">
-          <a href="#khata-form" className="btn btn-primary" onClick={onCta}>
-            <span>{t('hero.cta')}</span>
-            <ArrowRight size={18} className="flip-rtl" />
-          </a>
-          <a href="#features" className="btn btn-outline">{t('hero.secondary')}</a>
-        </div>
-        <div className="hero-badges">
-          <span className="hero-badge"><Mic size={15} />{t('hero.badges.voice')}</span>
-          <span className="hero-badge"><Scale size={15} />{t('hero.badges.price')}</span>
-          <span className="hero-badge"><ShieldCheck size={15} />{t('hero.badges.hash')}</span>
-          <span className="hero-badge"><MessageSquareText size={15} />{t('hero.badges.sms')}</span>
+
+        <div className="hero-foot">
+          <p className="hero-sub">{t('hero.sub')}</p>
+          <div className="hero-actions">
+            <a href="#khata-form" className="btn btn-solid" onClick={onCta}>
+              {t('hero.cta')} <span className="arrow" aria-hidden="true">→</span>
+            </a>
+            <a href="#features" className="link-under">{t('hero.down')} <span aria-hidden="true">↓</span></a>
+          </div>
         </div>
       </div>
 
-      <div className="scroll-cue" aria-hidden="true">
-        <span>{t('hero.scroll')}</span>
-        <span className="track" />
+      <div className="ticker" aria-label={t('hero.tickerLabel')}>
+        <span className="ticker-label">{t('hero.tickerLabel')}</span>
+        <div className="ticker-window" dir="ltr">
+          <div className="ticker-track">
+            {[0, 1].map(copy => (
+              <span key={copy} className="ticker-set" aria-hidden={copy === 1}>
+                {CROPS.map(([ur, en]) => (
+                  <span key={ur} className="ticker-item"><b>{ur.toUpperCase()}</b> {en}</span>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   )
