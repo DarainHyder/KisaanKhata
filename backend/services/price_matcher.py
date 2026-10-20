@@ -226,11 +226,27 @@ def _lookup_amis_live(query: str, db: Session) -> dict | None:
 
     cutoff = datetime.utcnow() - timedelta(hours=AMIS_LIVE_MAX_AGE_HOURS)
 
-    # Find the most recent scrape for this crop (within freshness window)
+    # Resolve to ONE crop name. A substring match alone would mix "potato"
+    # with "potato_store" or "sugar" with "brown_sugar" and skew the average,
+    # so an exact name wins, then the shortest partial match ("rice" -> "rice_irri").
+    names = [
+        n for (n,) in db.query(LivePriceEntry.crop_name)
+        .filter(
+            LivePriceEntry.crop_name.ilike(f"%{query}%"),
+            LivePriceEntry.scraped_at >= cutoff,
+        )
+        .distinct()
+    ]
+    if not names:
+        return None
+    exact = [n for n in names if n.lower() == query.lower()]
+    crop_name = exact[0] if exact else min(names, key=lambda n: (len(n), n))
+
+    # Most recent scrape for that crop (within freshness window)
     latest_ts = (
         db.query(func.max(LivePriceEntry.scraped_at))
         .filter(
-            LivePriceEntry.crop_name.ilike(f"%{query}%"),
+            LivePriceEntry.crop_name == crop_name,
             LivePriceEntry.scraped_at >= cutoff,
         )
         .scalar()
@@ -241,7 +257,7 @@ def _lookup_amis_live(query: str, db: Session) -> dict | None:
     rows = (
         db.query(LivePriceEntry)
         .filter(
-            LivePriceEntry.crop_name.ilike(f"%{query}%"),
+            LivePriceEntry.crop_name == crop_name,
             LivePriceEntry.scraped_at == latest_ts,
         )
         .all()
