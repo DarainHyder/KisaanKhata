@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import { CheckCircle2 } from 'lucide-react'
 import api from '../api'
 import { useI18n } from '../i18n/useI18n'
-import { useReveal, prefersReducedMotion } from '../hooks/motion'
+import { useReveal } from '../hooks/motion'
+import { startSmoothScroll, scrollToSection } from '../hooks/smoothScroll'
 import Hero from '../components/landing/Hero'
-import Intro from '../components/landing/Intro'
+import MandiStory from '../components/landing/MandiStory'
+import RateTicker from '../components/landing/RateTicker'
+import SmsPhone from '../components/landing/SmsPhone'
+import ChapterRail from '../components/landing/ChapterRail'
 import QuoteBand from '../components/landing/QuoteBand'
 import ExplodedKhata from '../components/landing/ExplodedKhata'
 import ParseSentence from '../components/landing/ParseSentence'
@@ -35,15 +38,11 @@ export default function FarmerLogin({ onLogin }) {
   useReveal(pageRef, [lang])
 
   // Inertial smooth scrolling for the landing page only.
-  useEffect(() => {
-    if (prefersReducedMotion()) return
-    const lenis = new Lenis({ autoRaf: true, anchors: { offset: -64 }, lerp: 0.1 })
-    return () => lenis.destroy()
-  }, [])
+  useEffect(() => startSmoothScroll(), [])
 
   function scrollToForm(e) {
     e.preventDefault()
-    formRef.current?.scrollIntoView({ behavior: 'smooth' })
+    scrollToSection(formRef.current)
   }
 
   async function handleLogin(e) {
@@ -121,13 +120,16 @@ export default function FarmerLogin({ onLogin }) {
 
   return (
     <div ref={pageRef}>
+      <ChapterRail />
       <Hero onCta={scrollToForm} />
-      <Intro />
+      <RateTicker />
+      <MandiStory />
       <ExplodedKhata />
       <ParseSentence />
       <QuoteBand />
       <FairPriceChecker />
       <HashChain />
+      <SmsPhone />
 
       {/* ---------- Open your khata ---------- */}
       <section id="khata-form" ref={formRef} className="access-section t-light">

@@ -1,22 +1,18 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { Wheat, Menu, X, LayoutDashboard, Mic, History, LogOut } from 'lucide-react'
+import { rootApi } from '../api'
 import { useI18n } from '../i18n/useI18n'
+import { scrollToSection, lockScroll } from '../hooks/smoothScroll'
 import LanguageSwitcher from './LanguageSwitcher'
-
-const SECTIONS = [
-  ['hero', 'nav.home'],
-  ['features', 'nav.features'],
-  ['how-it-works', 'nav.howItWorks'],
-  ['price-check', 'nav.priceCheck'],
-  ['contact', 'nav.contact'],
-]
+import { CHAPTERS } from './landing/chapters'
 
 export default function Navbar({ farmer, onLogout }) {
   const { t } = useI18n()
   const [scrolled, setScrolled] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [active, setActive] = useState('hero')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [preview, setPreview] = useState(0)
+  const [liveRows, setLiveRows] = useState(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -25,21 +21,32 @@ export default function Navbar({ farmer, onLogout }) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Highlight the landing section currently in view.
+  // How many live mandi rates the API holds right now.
   useEffect(() => {
     if (farmer) return
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id) })
-    }, { rootMargin: '-45% 0px -50% 0px' })
-    // Sections without a nav link still need observing so the highlight clears over them.
-    ;[...SECTIONS.map(([id]) => id), 'integrity', 'khata-form'].forEach(id => {
-      const el = document.getElementById(id)
-      if (el) io.observe(el)
-    })
-    return () => io.disconnect()
+    let alive = true
+    rootApi.get('/admin/scrape-status', { timeout: 25000 })
+      .then(r => { if (alive && r.data.live_price_rows > 0) setLiveRows(r.data.live_price_rows) })
+      .catch(() => {})
+    return () => { alive = false }
   }, [farmer])
 
-  const close = () => setMobileMenuOpen(false)
+  useEffect(() => {
+    lockScroll(menuOpen)
+    if (!menuOpen) return
+    const onKey = e => { if (e.key === 'Escape') setMenuOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
+  const close = () => setMenuOpen(false)
+  const go = id => e => {
+    e.preventDefault()
+    close()
+    // Let the menu start closing before the page glides.
+    setTimeout(() => scrollToSection(id), menuOpen ? 120 : 0)
+  }
+
   const appLinks = [
     ['/', 'nav.dashboard', LayoutDashboard],
     ['/voice', 'nav.addVoiceEntry', Mic],
@@ -48,8 +55,8 @@ export default function Navbar({ farmer, onLogout }) {
 
   return (
     <>
-      <nav className={`navbar${scrolled || farmer ? ' solid' : ' on-photo'}`}>
-        <Link to="/" className="navbar-brand">
+      <nav className={`navbar${scrolled || farmer ? ' solid' : ' on-photo'}${menuOpen ? ' menu-open' : ''}`}>
+        <Link to="/" className="navbar-brand" onClick={e => { if (!farmer) { e.preventDefault(); close(); scrollToSection('hero', { offset: 0 }) } }}>
           <span className="brand-mark"><Wheat size={19} /></span>
           <span>KisaanKhata</span>
           <span className="brand-ur" lang="ur">کسان کھاتہ</span>
@@ -71,37 +78,39 @@ export default function Navbar({ farmer, onLogout }) {
             </button>
           </div>
         ) : (
-          <div className="navbar-links">
-            {SECTIONS.map(([id, key]) => (
-              <a key={id} href={`#${id}`} className={`nav-link${active === id ? ' active' : ''}`}>{t(key)}</a>
-            ))}
+          <div className="navbar-links landing-links">
+            {liveRows && (
+              <a href="#price-check" className="live-badge" onClick={go('price-check')}>
+                <i className="live-dot" />
+                <span>{t('v4.nav.live', { n: liveRows.toLocaleString('en-US') })}</span>
+              </a>
+            )}
             <LanguageSwitcher />
-            <a href="#khata-form" className="btn btn-primary btn-inline" style={{ padding: '9px 18px', fontSize: '0.88rem' }}>
+            <a href="#khata-form" className="btn btn-primary btn-inline nav-cta" onClick={go('khata-form')}>
               {t('nav.accessLedger')}
             </a>
           </div>
         )}
 
-        <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} aria-label={t('nav.openMenu')}>
-          <Menu size={22} />
+        <button className={`menu-btn${farmer ? ' app-only' : ''}`} onClick={() => setMenuOpen(o => !o)} aria-expanded={menuOpen} aria-label={menuOpen ? t('nav.closeMenu') : t('nav.openMenu')}>
+          <span className="menu-word">{menuOpen ? t('v4.nav.close') : t('v4.nav.menu')}</span>
+          {menuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </nav>
 
-      <div className={`mobile-menu-overlay${mobileMenuOpen ? ' open' : ''}`} onClick={close} />
-
-      <aside className={`mobile-menu-panel${mobileMenuOpen ? ' open' : ''}`} aria-hidden={!mobileMenuOpen}>
-        <div className="mobile-menu-header">
-          <div className="navbar-brand">
-            <span className="brand-mark"><Wheat size={19} /></span>
-            <span>{t('brand')}</span>
-          </div>
-          <button className="icon-btn" onClick={close} aria-label={t('nav.closeMenu')}><X size={24} /></button>
-        </div>
-
-        <div className="mobile-menu-links">
-          <LanguageSwitcher variant="compact" />
-          {farmer ? (
-            <>
+      {farmer ? (
+        <>
+          <div className={`mobile-menu-overlay${menuOpen ? ' open' : ''}`} onClick={close} />
+          <aside className={`mobile-menu-panel${menuOpen ? ' open' : ''}`} aria-hidden={!menuOpen}>
+            <div className="mobile-menu-header">
+              <div className="navbar-brand">
+                <span className="brand-mark"><Wheat size={19} /></span>
+                <span>{t('brand')}</span>
+              </div>
+              <button className="icon-btn" onClick={close} aria-label={t('nav.closeMenu')}><X size={24} /></button>
+            </div>
+            <div className="mobile-menu-links">
+              <LanguageSwitcher variant="compact" />
               <div className="mobile-farmer">{t('nav.loggedInAs')} <strong>{farmer.name}</strong>{farmer.location ? ` (${farmer.location})` : ''}</div>
               {appLinks.map(([to, key]) => (
                 <NavLink key={to} to={to} end={to === '/'} className="mobile-nav-link" onClick={close}>{t(key)}</NavLink>
@@ -109,26 +118,41 @@ export default function Navbar({ farmer, onLogout }) {
               <button className="btn btn-outline" style={{ marginTop: 20 }} onClick={() => { onLogout(); close() }}>
                 <LogOut size={16} />{t('nav.logout')}
               </button>
-            </>
-          ) : (
-            <>
-              {SECTIONS.map(([id, key]) => (
-                <a key={id} href={`#${id}`} className="mobile-nav-link" onClick={close}>{t(key)}</a>
+            </div>
+          </aside>
+          <nav className="tab-nav" aria-label={t('nav.dashboard')}>
+            {appLinks.map(([to, , Icon]) => (
+              <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `tab-btn${isActive ? ' active' : ''}`}>
+                <Icon size={18} /><span>{t(`nav.short.${to === '/' ? 'home' : to.slice(1)}`)}</span>
+              </NavLink>
+            ))}
+          </nav>
+        </>
+      ) : (
+        <div className={`fullmenu t-dark${menuOpen ? ' open' : ''}`} aria-hidden={!menuOpen} inert={!menuOpen}>
+          <div className="fm-photos" aria-hidden="true">
+            {CHAPTERS.map(([id, , src], i) => (
+              <img key={id} src={src} alt="" loading="lazy" className={i === preview ? 'on' : ''} />
+            ))}
+          </div>
+          <div className="fm-inner">
+            <ol className="fm-list">
+              {CHAPTERS.map(([id, key], i) => (
+                <li key={id} style={{ '--i': i }}>
+                  <a href={`#${id}`} onClick={go(id)} onMouseEnter={() => setPreview(i)} onFocus={() => setPreview(i)}>
+                    <b>{String(i + 1).padStart(2, '0')}</b>
+                    <span>{t(key)}</span>
+                  </a>
+                </li>
               ))}
-              <a href="#khata-form" className="btn btn-primary" style={{ marginTop: 16 }} onClick={close}>{t('nav.accessLedger')}</a>
-            </>
-          )}
+            </ol>
+            <div className="fm-side">
+              <p className="fm-slogan" lang="ur" dir="rtl">{t('hero.slogan')}</p>
+              <LanguageSwitcher variant="compact" />
+              <a href="#contact" className="link-under" onClick={go('contact')}>{t('nav.contact')}</a>
+            </div>
+          </div>
         </div>
-      </aside>
-
-      {farmer && (
-        <nav className="tab-nav" aria-label={t('nav.dashboard')}>
-          {appLinks.map(([to, , Icon]) => (
-            <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `tab-btn${isActive ? ' active' : ''}`}>
-              <Icon size={18} /><span>{t(`nav.short.${to === '/' ? 'home' : to.slice(1)}`)}</span>
-            </NavLink>
-          ))}
-        </nav>
       )}
     </>
   )
