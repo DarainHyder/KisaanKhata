@@ -26,7 +26,11 @@ export default function Navbar({ farmer, onLogout }) {
     if (farmer) return
     let alive = true
     rootApi.get('/admin/scrape-status', { timeout: 25000 })
-      .then(r => { if (alive && r.data.live_price_rows > 0) setLiveRows(r.data.live_price_rows) })
+      .then(r => {
+        // Older API builds only report the cumulative total across scrapes.
+        const n = r.data.current_price_rows ?? r.data.live_price_rows
+        if (alive && n > 0) setLiveRows(n)
+      })
       .catch(() => {})
     return () => { alive = false }
   }, [farmer])

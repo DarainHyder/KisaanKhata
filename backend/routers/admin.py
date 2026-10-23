@@ -130,8 +130,22 @@ def scrape_status(db: Session = Depends(get_db)):
     latest_ts = db.query(func.max(LivePriceEntry.scraped_at)).scalar()
     crop_count = db.query(func.count(LivePriceEntry.crop_name.distinct())).scalar()
 
+    # Rows accumulate every 6 hours; "current" means each crop's most recent scrape only.
+    latest_per_crop = (
+        db.query(LivePriceEntry.crop_name, func.max(LivePriceEntry.scraped_at).label("ts"))
+        .group_by(LivePriceEntry.crop_name)
+        .subquery()
+    )
+    current_rows = (
+        db.query(func.count(LivePriceEntry.id))
+        .join(latest_per_crop, (LivePriceEntry.crop_name == latest_per_crop.c.crop_name)
+              & (LivePriceEntry.scraped_at == latest_per_crop.c.ts))
+        .scalar()
+    )
+
     return {
         "live_price_rows":    row_count,
+        "current_price_rows": current_rows,
         "distinct_crops":     crop_count,
         "latest_scrape":      latest_ts.isoformat() if latest_ts else None,
         "scheduler_running":  True,   # always True if app is up
